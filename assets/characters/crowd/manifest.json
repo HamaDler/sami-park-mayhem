@@ -1,0 +1,422 @@
+[
+  {
+    "id": "men_Beach",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Beach.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Beach",
+    "width": 1024,
+    "height": 1560,
+    "rows": 13,
+    "vertices": 13296,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.023445961019649075,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.0374030046920306,
+      1.9405526637649075,
+      1.232560138133831
+    ]
+  },
+  {
+    "id": "men_Casual_2",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Casual_2.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Casual_2",
+    "width": 1024,
+    "height": 1440,
+    "rows": 12,
+    "vertices": 11660,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.016499373689672747,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.0374030046920306,
+      1.9336060764349312,
+      1.229855908900871
+    ]
+  },
+  {
+    "id": "men_Casual_Hoodie",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Casual_Hoodie.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Casual_Hoodie",
+    "width": 1024,
+    "height": 1560,
+    "rows": 13,
+    "vertices": 12518,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.01873709119376704,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.0446368783994977,
+      1.9358437939390254,
+      1.2317643181136508
+    ]
+  },
+  {
+    "id": "men_Farmer",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Farmer.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Farmer",
+    "width": 1024,
+    "height": 1320,
+    "rows": 11,
+    "vertices": 11006,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.01567484037441258,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.0358612695152725,
+      1.9327815431196709,
+      1.2244143249920345
+    ]
+  },
+  {
+    "id": "men_Punk",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Punk.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Punk",
+    "width": 1024,
+    "height": 1320,
+    "rows": 11,
+    "vertices": 11040,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.01873709119376704,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.0374030046920306,
+      1.9778692497058925,
+      1.2317637650364848
+    ]
+  },
+  {
+    "id": "men_Suit",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Suit.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Suit",
+    "width": 1024,
+    "height": 1680,
+    "rows": 14,
+    "vertices": 13335,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.016420403622459084,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.038811900463569,
+      1.9335271063677175,
+      1.2292520291176523
+    ]
+  },
+  {
+    "id": "men_Worker",
+    "gender": "men",
+    "source": "res://assets/characters/crowd/men/Worker.gltf",
+    "directory": "res://assets/characters/crowd/baked/men/Worker",
+    "width": 1024,
+    "height": 1320,
+    "rows": 11,
+    "vertices": 10534,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.3333333730697632,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.6666666269302368,
+      1.2666666507720947
+    ],
+    "min": [
+      -0.7457769590390609,
+      -0.01833166262758218,
+      -0.730326074086137
+    ],
+    "extent": [
+      1.0374030046920306,
+      1.9354383653728406,
+      1.2272345047737143
+    ]
+  },
+  {
+    "id": "women_Casual",
+    "gender": "women",
+    "source": "res://assets/characters/crowd/women/Casual.gltf",
+    "directory": "res://assets/characters/crowd/baked/women/Casual",
+    "width": 1024,
+    "height": 1560,
+    "rows": 13,
+    "vertices": 12968,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.6666666269302368,
+      2.0833332538604736,
+      2.0833332538604736,
+      2.0833332538604736,
+      1.5833333730697632
+    ],
+    "min": [
+      -0.7142214168066798,
+      -0.008918863235234008,
+      -0.7563550158612478
+    ],
+    "extent": [
+      0.9936689711467694,
+      1.911816201206133,
+      1.2588505330083257
+    ]
+  },
+  {
+    "id": "women_Formal",
+    "gender": "women",
+    "source": "res://assets/characters/crowd/women/Formal.gltf",
+    "directory": "res://assets/characters/crowd/baked/women/Formal",
+    "width": 1024,
+    "height": 1560,
+    "rows": 13,
+    "vertices": 12296,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.6666666269302368,
+      2.0833332538604736,
+      2.0833332538604736,
+      2.0833332538604736,
+      1.5833333730697632
+    ],
+    "min": [
+      -0.7138772260807089,
+      -0.0019475753103573945,
+      -0.755920332168413
+    ],
+    "extent": [
+      0.9931609583438621,
+      1.9044140386843176,
+      1.2537407383706656
+    ]
+  },
+  {
+    "id": "women_Punk",
+    "gender": "women",
+    "source": "res://assets/characters/crowd/women/Punk.gltf",
+    "directory": "res://assets/characters/crowd/baked/women/Punk",
+    "width": 1024,
+    "height": 1440,
+    "rows": 12,
+    "vertices": 11956,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.6666666269302368,
+      2.0833332538604736,
+      2.0833332538604736,
+      2.0833332538604736,
+      1.5833333730697632
+    ],
+    "min": [
+      -0.713877385891031,
+      -0.0030372805007456895,
+      -0.7559201881732049
+    ],
+    "extent": [
+      0.9931609206716985,
+      1.9555616038597545,
+      1.2628009612505906
+    ]
+  },
+  {
+    "id": "women_Suit",
+    "gender": "women",
+    "source": "res://assets/characters/crowd/women/Suit.gltf",
+    "directory": "res://assets/characters/crowd/baked/women/Suit",
+    "width": 1024,
+    "height": 1560,
+    "rows": 13,
+    "vertices": 13084,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.6666666269302368,
+      2.0833332538604736,
+      2.0833332538604736,
+      2.0833332538604736,
+      1.5833333730697632
+    ],
+    "min": [
+      -0.713877385891031,
+      -0.007953475042269148,
+      -0.7559201881732049
+    ],
+    "extent": [
+      0.9931608989394052,
+      1.9104203825515815,
+      1.2573585126840765
+    ]
+  },
+  {
+    "id": "women_Worker",
+    "gender": "women",
+    "source": "res://assets/characters/crowd/women/Worker.gltf",
+    "directory": "res://assets/characters/crowd/baked/women/Worker",
+    "width": 1024,
+    "height": 1560,
+    "rows": 13,
+    "vertices": 12368,
+    "frames": 24,
+    "clips": [
+      "Walk",
+      "Idle_Neutral",
+      "Idle",
+      "Wave",
+      "Interact"
+    ],
+    "lengths": [
+      1.6666666269302368,
+      2.0833332538604736,
+      2.0833332538604736,
+      2.0833332538604736,
+      1.5833333730697632
+    ],
+    "min": [
+      -0.713877385891031,
+      -0.007953475042269148,
+      -0.7559201881732049
+    ],
+    "extent": [
+      0.9931609186198203,
+      1.9104203825515815,
+      1.257358128833992
+    ]
+  }
+]

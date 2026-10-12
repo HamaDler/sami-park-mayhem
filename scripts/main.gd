@@ -11,6 +11,7 @@ func _ready() -> void:
     hud.initialize($GolfCart,park)
     player.recovered.connect(hud.show_toast)
     enter_vehicle($GolfCart/VehicleAccess,true)
+    $Crowd.initialize(park)
     get_window().focus_exited.connect(func():hud.set_paused(true))
 func get_active_actor() -> CharacterBody3D:
     if is_instance_valid(active_vehicle):return active_vehicle.vehicle
@@ -94,7 +95,7 @@ func exit_vehicle() -> bool:
 func teleport_active(point: Vector2, yaw: float) -> void:
     get_active_actor().teleport_to(point,yaw)
     if not is_driving():camera_rig.foot_yaw=yaw
-    camera_rig.snap();park.nature.refresh()
+    camera_rig.snap();park.nature.refresh();$Crowd.refresh()
 func recover_active() -> void:get_active_actor().recover()
 func interaction_text() -> String:
     if is_driving():return "F  /  EXIT "+active_vehicle.display_name

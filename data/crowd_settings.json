@@ -1,0 +1,19 @@
+{
+  "population": 1000,
+  "seed": 0,
+  "walk_speed_min": 0.9,
+  "walk_speed_max": 1.8,
+  "pause_chance_at_junction": 0.12,
+  "idle_seconds_min": 2.5,
+  "idle_seconds_max": 8.0,
+  "simulation_interval": 0.05,
+  "visibility_interval": 0.35,
+  "visible_distance": 280.0,
+  "shadow_distance": 55.0,
+  "batch_cell_size": 64.0,
+  "entrance_population_fraction": 0.10,
+  "entrance_radius": 110.0,
+  "actor_clearance": 2.4,
+  "obstacle_check_distance": 45.0,
+  "max_obstacle_queries_per_tick": 6
+}
