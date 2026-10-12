@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bniend11yl7nx"
-path="res://.godot/imported/PalmTree_Leaves.png-47c92c6b3212401c77f98fae29cbb44a.ctex"
+path.s3tc="res://.godot/imported/PalmTree_Leaves.png-47c92c6b3212401c77f98fae29cbb44a.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/nature/textures/PalmTree_Leaves.png"
-dest_files=["res://.godot/imported/PalmTree_Leaves.png-47c92c6b3212401c77f98fae29cbb44a.ctex"]
+dest_files=["res://.godot/imported/PalmTree_Leaves.png-47c92c6b3212401c77f98fae29cbb44a.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -37,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=1024
-detect_3d/compress_to=1
+detect_3d/compress_to=0

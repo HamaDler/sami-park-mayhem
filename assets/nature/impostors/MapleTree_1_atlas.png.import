@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kopsr87pup00"
-path="res://.godot/imported/MapleTree_1_atlas.png-d71c1fa12f1bebc127aac6b6dfe94854.ctex"
+path.s3tc="res://.godot/imported/MapleTree_1_atlas.png-d71c1fa12f1bebc127aac6b6dfe94854.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/nature/impostors/MapleTree_1_atlas.png"
-dest_files=["res://.godot/imported/MapleTree_1_atlas.png-d71c1fa12f1bebc127aac6b6dfe94854.ctex"]
+dest_files=["res://.godot/imported/MapleTree_1_atlas.png-d71c1fa12f1bebc127aac6b6dfe94854.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -37,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

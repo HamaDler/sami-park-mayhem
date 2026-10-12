@@ -19,11 +19,27 @@ var selected: Dictionary = {}
 var requested_point: Vector2
 var panning: bool = false
 var label_rects: Array[Rect2] = []
+var terrain: Node2D
+var overlay: Node2D
+var terrain_scale: float = -1.0
+var tree_mesh: ArrayMesh
+var label_font: Font
+var compass_font: Font
+var label_style: StyleBoxFlat
+const TREE_SEGMENTS: int = 12
 
 func _ready() -> void:
     clip_contents=true
     mouse_filter=Control.MOUSE_FILTER_STOP
     mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+    # Retain world-space scenery commands; panning only changes its transform.
+    terrain=Node2D.new();terrain.name="Terrain";add_child(terrain)
+    terrain.draw.connect(_draw_terrain)
+    overlay=Node2D.new();overlay.name="Overlay";add_child(overlay)
+    overlay.draw.connect(_draw_overlay)
+    label_font=GameUI.regular();compass_font=GameUI.bold()
+    label_style=StyleBoxFlat.new()
+    label_style.bg_color=Color(.045,.065,.10,.94)
     resized.connect(_resize_map)
 
 func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
@@ -43,6 +59,8 @@ func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
     lakes.assign(park.water_polygons)
     sports_polygons.assign(park.sports.polygons)
     trees=park.tree_positions.duplicate()
+    _build_tree_mesh()
+    terrain_scale=-1.0
     labels=JSON.parse_string(FileAccess.get_file_as_string("res://data/map_labels.json"))
     fit_park()
 
@@ -90,36 +108,73 @@ func _gui_input(event: InputEvent) -> void:
         queue_redraw()
         accept_event()
 
+func _build_tree_mesh() -> void:
+    tree_mesh=null
+    if trees.is_empty():return
+    # One indexed mesh replaces more than ten thousand individual circle commands.
+    var vertices:=PackedVector2Array()
+    var indices:=PackedInt32Array()
+    vertices.resize(trees.size()*(TREE_SEGMENTS+1))
+    indices.resize(trees.size()*TREE_SEGMENTS*3)
+    for i in trees.size():
+        var first:=i*(TREE_SEGMENTS+1)
+        vertices[first]=trees[i]
+        for segment in TREE_SEGMENTS:
+            var angle:=TAU*segment/TREE_SEGMENTS
+            vertices[first+1+segment]=trees[i]+Vector2(cos(angle),sin(angle))*4.5
+            var triangle: int=(i*TREE_SEGMENTS+segment)*3
+            indices[triangle]=first
+            indices[triangle+1]=first+1+segment
+            indices[triangle+2]=first+1+(segment+1)%TREE_SEGMENTS
+    var arrays:=[]
+    arrays.resize(Mesh.ARRAY_MAX)
+    arrays[Mesh.ARRAY_VERTEX]=vertices
+    arrays[Mesh.ARRAY_INDEX]=indices
+    tree_mesh=ArrayMesh.new()
+    tree_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays,[],{},Mesh.ARRAY_FLAG_USE_2D_VERTICES)
+
 func _draw() -> void:
     draw_rect(Rect2(Vector2.ZERO,size),Color("dadccd"))
     if park==null:return
     var scale_factor:=fit_scale*zoom
-    draw_set_transform(size*0.5-center_world*scale_factor,0,Vector2.ONE*scale_factor)
+    terrain.position=size*0.5-center_world*scale_factor
+    terrain.scale=Vector2.ONE*scale_factor
+    if not is_equal_approx(terrain_scale,scale_factor):
+        terrain_scale=scale_factor
+        terrain.queue_redraw()
+    overlay.queue_redraw()
+
+func _draw_terrain() -> void:
+    if park==null:return
+    var scale_factor:=fit_scale*zoom
     for road in roads:
-        draw_polyline(road.points,Color("b3b6a6"),maxf(road.width+7,5/scale_factor),true)
-        draw_polyline(road.points,Color("f3eed9"),maxf(road.width,2.5/scale_factor),true)
-    for building in buildings:draw_colored_polygon(building,Color("c4c2af"))
-    draw_colored_polygon(park_polygon,Color("8ea97b"))
+        terrain.draw_polyline(road.points,Color("b3b6a6"),maxf(road.width+7,5/scale_factor),true)
+        terrain.draw_polyline(road.points,Color("f3eed9"),maxf(road.width,2.5/scale_factor),true)
+    for building in buildings:terrain.draw_colored_polygon(building,Color("c4c2af"))
+    terrain.draw_colored_polygon(park_polygon,Color("8ea97b"))
     var border:=park_polygon.duplicate()
     border.append(border[0])
-    draw_polyline(border,Color("536c50"),2.0/scale_factor,true)
-    for i in gardens.size():draw_colored_polygon(gardens[i],Color("a0b48a") if i%2==0 else Color("83a474"))
-    for tree in trees:draw_circle(tree,4.5,Color("79966a"))
+    terrain.draw_polyline(border,Color("536c50"),2.0/scale_factor,true)
+    for i in gardens.size():terrain.draw_colored_polygon(gardens[i],Color("a0b48a") if i%2==0 else Color("83a474"))
+    if tree_mesh:terrain.draw_mesh(tree_mesh,null,Transform2D.IDENTITY,Color("79966a"))
     for poly in lakes:
         var shore:=poly.duplicate()
         shore.append(shore[0])
-        draw_polyline(shore,Color("b9c5a0"),5,true)
-        draw_colored_polygon(poly,Color("65a7af"))
-        draw_polyline(shore,Color("498791"),1.0/scale_factor,true)
+        terrain.draw_polyline(shore,Color("b9c5a0"),5,true)
+        terrain.draw_colored_polygon(poly,Color("65a7af"))
+        terrain.draw_polyline(shore,Color("498791"),1.0/scale_factor,true)
     for path in paths:
-        draw_polyline(path.points,Color("7c8767"),maxf(path.width+2,2.5/scale_factor),true)
-        draw_polyline(path.points,Color("e9ddba"),maxf(path.width,1.2/scale_factor),true)
-    draw_polyline(park.running_track.centerline,Color("b75346"),maxf(float(park.running_track.layout.width),2.8/scale_factor),true)
-    for divider in park.running_track.lane_dividers:draw_polyline(divider,Color("f4f1e8"),maxf(float(park.running_track.layout.line_width),.55/scale_factor),true)
-    for court in sports_polygons:draw_colored_polygon(court,Color("698d92"))
+        terrain.draw_polyline(path.points,Color("7c8767"),maxf(path.width+2,2.5/scale_factor),true)
+        terrain.draw_polyline(path.points,Color("e9ddba"),maxf(path.width,1.2/scale_factor),true)
+    terrain.draw_polyline(park.running_track.centerline,Color("b75346"),maxf(float(park.running_track.layout.width),2.8/scale_factor),true)
+    for divider in park.running_track.lane_dividers:terrain.draw_polyline(divider,Color("f4f1e8"),maxf(float(park.running_track.layout.line_width),.55/scale_factor),true)
+    for court in sports_polygons:terrain.draw_colored_polygon(court,Color("698d92"))
     for building in buildings:
-        if bounds.has_point(building[0]):draw_colored_polygon(building,Color("b9b597"))
-    draw_set_transform(Vector2.ZERO)
+        if bounds.has_point(building[0]):terrain.draw_colored_polygon(building,Color("b9b597"))
+
+func _draw_overlay() -> void:
+    if park==null:return
+    var scale_factor:=fit_scale*zoom
     label_rects.clear()
     for entry in labels:
         var point:=world_to_map(Vector2(entry.position[0],entry.position[1]))
@@ -129,29 +184,29 @@ func _draw() -> void:
         var point: Vector2 = selected.get("position",requested_point)
         var marker:=world_to_map(point)
         var color:=GameUI.LIME if selected.valid else Color("be5645")
-        draw_circle(marker,12,Color(0.1,0.2,0.14,0.25))
-        draw_arc(marker,9,0,TAU,32,color,2.5,true)
-        draw_line(marker-Vector2(15,0),marker+Vector2(15,0),color,1.5,true)
-        draw_line(marker-Vector2(0,15),marker+Vector2(0,15),color,1.5,true)
+        overlay.draw_circle(marker,12,Color(0.1,0.2,0.14,0.25))
+        overlay.draw_arc(marker,9,0,TAU,32,color,2.5,true)
+        overlay.draw_line(marker-Vector2(15,0),marker+Vector2(15,0),color,1.5,true)
+        overlay.draw_line(marker-Vector2(0,15),marker+Vector2(0,15),color,1.5,true)
         if selected.valid:
             var heading:=Vector2(-sin(selected.yaw),-cos(selected.yaw))
-            draw_line(marker,marker+heading*25,color,3,true)
+            overlay.draw_line(marker,marker+heading*25,color,3,true)
     if cart.is_in_group("walk_player"):
         for access: Node3D in get_tree().get_nodes_in_group("vehicles"):
             var vehicle_point:=world_to_map(Vector2(access.vehicle.global_position.x,access.vehicle.global_position.z))
-            draw_rect(Rect2(vehicle_point-Vector2(6,4),Vector2(12,8)),GameUI.INK)
-            draw_rect(Rect2(vehicle_point-Vector2(4,2),Vector2(8,4)),Color("8bcbd4"))
+            overlay.draw_rect(Rect2(vehicle_point-Vector2(6,4),Vector2(12,8)),GameUI.INK)
+            overlay.draw_rect(Rect2(vehicle_point-Vector2(4,2),Vector2(8,4)),Color("8bcbd4"))
             if zoom>2 and Rect2(Vector2(8,8),size-Vector2(16,16)).has_point(vehicle_point):_place_label(vehicle_point,access.display_name,"vehicle")
     var player:=world_to_map(Vector2(cart.global_position.x,cart.global_position.z))
     var direction:=Vector2(-sin(cart.rotation.y),-cos(cart.rotation.y))
     var sideways:=Vector2(-direction.y,direction.x)
-    draw_circle(player,12,Color("1f4138"))
-    draw_colored_polygon(PackedVector2Array([player+direction*12,player-direction*7+sideways*6,player-direction*7-sideways*6]),GameUI.LIME)
+    overlay.draw_circle(player,12,Color("1f4138"))
+    overlay.draw_colored_polygon(PackedVector2Array([player+direction*12,player-direction*7+sideways*6,player-direction*7-sideways*6]),GameUI.LIME)
     _draw_compass()
     _draw_scale(scale_factor)
 
 func _place_label(point: Vector2, text: String, kind: String) -> void:
-    var font:=GameUI.regular()
+    var font:=label_font
     var font_size:=13 if kind=="place" else 12
     var text_size:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size)
     var rect:=Rect2(point+Vector2(9,-13),text_size+Vector2(14,10))
@@ -165,21 +220,18 @@ func _place_label(point: Vector2, text: String, kind: String) -> void:
             rect=candidate
             break
     label_rects.append(rect)
-    var style:=StyleBoxFlat.new()
-    style.bg_color=Color(.045,.065,.10,.94)
-    style.set_corner_radius_all(0)
     if rect.position.distance_to(point+Vector2(9,-13))>10:
-        draw_line(point,rect.position+Vector2(0,rect.size.y*0.5),Color("536c50"),1,true)
-    draw_style_box(style,rect)
-    draw_circle(point,4,GameUI.LIME if kind=="gate" else Color("e5ebd2"))
-    draw_string(font,rect.position+Vector2(7,17),text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,Color("f4efd9"))
+        overlay.draw_line(point,rect.position+Vector2(0,rect.size.y*0.5),Color("536c50"),1,true)
+    overlay.draw_style_box(label_style,rect)
+    overlay.draw_circle(point,4,GameUI.LIME if kind=="gate" else Color("e5ebd2"))
+    overlay.draw_string(font,rect.position+Vector2(7,17),text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,Color("f4efd9"))
 
 func _draw_compass() -> void:
     var origin:=Vector2(size.x-42,44)
-    draw_colored_polygon(PackedVector2Array([origin+Vector2(-24,-24),origin+Vector2(15,-24),origin+Vector2(24,-15),origin+Vector2(24,24),origin+Vector2(-24,24)]),Color(.045,.065,.10,.94))
-    draw_line(origin+Vector2(0,11),origin+Vector2(0,-8),GameUI.LIME,2,true)
-    draw_colored_polygon(PackedVector2Array([origin+Vector2(0,-13),origin+Vector2(-5,-4),origin+Vector2(5,-4)]),GameUI.LIME)
-    draw_string(GameUI.bold(),origin+Vector2(-5,-27),"N",HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.INK)
+    overlay.draw_colored_polygon(PackedVector2Array([origin+Vector2(-24,-24),origin+Vector2(15,-24),origin+Vector2(24,-15),origin+Vector2(24,24),origin+Vector2(-24,24)]),Color(.045,.065,.10,.94))
+    overlay.draw_line(origin+Vector2(0,11),origin+Vector2(0,-8),GameUI.LIME,2,true)
+    overlay.draw_colored_polygon(PackedVector2Array([origin+Vector2(0,-13),origin+Vector2(-5,-4),origin+Vector2(5,-4)]),GameUI.LIME)
+    overlay.draw_string(compass_font,origin+Vector2(-5,-27),"N",HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.INK)
 
 func _draw_scale(scale_factor: float) -> void:
     var metres:=200.0
@@ -187,7 +239,7 @@ func _draw_scale(scale_factor: float) -> void:
     while metres*scale_factor<50:metres*=2
     var length:=metres*scale_factor
     var point:=Vector2(24,size.y-28)
-    draw_rect(Rect2(point-Vector2(12,29),Vector2(length+24,47)),Color(.045,.065,.10,.94))
-    draw_line(point,point+Vector2(length,0),GameUI.WHITE,2,true)
-    for end in [point,point+Vector2(length,0)]:draw_line(end-Vector2(0,4),end+Vector2(0,4),GameUI.WHITE,2,true)
-    draw_string(GameUI.regular(),point-Vector2(0,11),"%.0f m" % metres,HORIZONTAL_ALIGNMENT_LEFT,-1,12,GameUI.WHITE)
+    overlay.draw_rect(Rect2(point-Vector2(12,29),Vector2(length+24,47)),Color(.045,.065,.10,.94))
+    overlay.draw_line(point,point+Vector2(length,0),GameUI.WHITE,2,true)
+    for end in [point,point+Vector2(length,0)]:overlay.draw_line(end-Vector2(0,4),end+Vector2(0,4),GameUI.WHITE,2,true)
+    overlay.draw_string(label_font,point-Vector2(0,11),"%.0f m" % metres,HORIZONTAL_ALIGNMENT_LEFT,-1,12,GameUI.WHITE)

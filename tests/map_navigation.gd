@@ -42,6 +42,11 @@ func run() -> void:
     check(canvas.paths.size()==park.layout.paths.size() and canvas.lakes.size()==park.water_polygons.size(),"Full map uses the actual game paths and lakes")
     check(canvas.labels.size()>=7 and canvas.trees.size()==park.tree_count,"Stylized map includes entrances, landmarks, and park planting")
     check(Rect2(Vector2.ZERO,map.size).encloses(map.side_panel.get_rect()),"Map sidebar stays within the viewport")
+    check(root.disable_3d,"Full map suspends hidden 3D rendering")
+    check(canvas.tree_mesh != null and canvas.tree_mesh.get_surface_count()==1,"All map trees share a single mesh")
+    await ui_frames()
+    var terrain_draws: Dictionary={"count":0}
+    canvas.terrain.draw.connect(func():terrain_draws.count+=1)
     var position_before:=cart.position
     Input.action_press("accelerate")
     await create_timer(0.05,true).timeout
@@ -59,11 +64,19 @@ func run() -> void:
     click.button_index=MOUSE_BUTTON_RIGHT
     click.pressed=true
     canvas._gui_input(click)
+    await ui_frames()
+    var draws_before: int=terrain_draws.count
     var center_before: Vector2=canvas.center_world
     var drag:=InputEventMouseMotion.new()
     drag.relative=Vector2(80,-40)
     canvas._gui_input(drag)
     check(canvas.center_world.distance_to(center_before)>20,"Dragging pans the map across real world coordinates")
+    await ui_frames()
+    check(terrain_draws.count==draws_before,"Panning reuses scenery without rebuilding its drawing commands")
+    check(canvas.terrain.position.is_equal_approx(canvas.size*.5-canvas.center_world*canvas.fit_scale*canvas.zoom),"Cached scenery follows the map transform")
+    canvas.zoom_at(1.2,anchor)
+    await ui_frames()
+    check(terrain_draws.count>draws_before,"Zoom refreshes scenery line widths")
     click.pressed=false
     canvas._gui_input(click)
     check(not canvas.panning,"Releasing the mouse ends panning")
@@ -90,6 +103,7 @@ func run() -> void:
     map.spawn_button.pressed.emit()
     await ui_frames(5)
     check(not paused and not map.visible,"Spawn here closes the map and resumes the game")
+    check(not root.disable_3d,"Spawning restores 3D rendering")
     check(Vector2(cart.position.x,cart.position.z).distance_to(selected)<0.01,"Cart appears at the selected map coordinates")
     check(cart.speed==0 and cart.velocity.x==0 and not cart.drifting and cart.slip_angle==0,"Map spawning clears speed and drift momentum")
     check(absf(cart.distance_m-trip_before)<0.01,"Teleport distance is not counted as distance driven")
@@ -131,6 +145,7 @@ func run() -> void:
     obstacle.queue_free()
     await key(KEY_ESCAPE)
     check(not map.visible and not paused,"Esc closes the map and restores driving")
+    check(not root.disable_3d,"Esc restores 3D rendering")
     hud.set_paused(true)
     await key(KEY_M)
     await key(KEY_M)
@@ -154,5 +169,10 @@ func run() -> void:
     canvas._gui_input(click)
     await ui_frames()
     check(not map.visible and Vector2(cart.position.x,cart.position.z).distance_to(destination)<0.1,"Double-click selects and spawns directly")
+    root.disable_3d=true
+    await key(KEY_M)
+    await key(KEY_M)
+    check(root.disable_3d,"Closing the map preserves a previously disabled 3D viewport")
+    root.disable_3d=false
     print("MAP_RESULT: ",checks," checks, ",failures," failures")
     quit(failures)

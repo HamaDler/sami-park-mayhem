@@ -189,6 +189,7 @@ func teleport_to(point: Vector2, yaw: float) -> void:
     _reset_handling()
     safe_transform=global_transform
     on_path=park.is_on_path(global_position)
+    force_update_transform()
     reset_physics_interpolation()
     last_reason="Moved to your map destination"
     recovered.emit(last_reason)

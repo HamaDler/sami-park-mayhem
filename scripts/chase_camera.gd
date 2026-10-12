@@ -12,6 +12,7 @@ var foot_settings: Dictionary
 var on_foot: bool=false
 var aiming: bool=false
 var sniper_scope: bool=false
+var snap_through_physics_frame: int=-1
 @onready var arm: SpringArm3D=$SpringArm3D
 @onready var camera: Camera3D=$SpringArm3D/Camera3D
 func _ready() -> void:
@@ -36,6 +37,8 @@ func heading(pose: Transform3D) -> float:
     return atan2(-forward.x,-forward.z) if Vector2(forward.x,forward.z).length_squared()>.01 else rotation.y
 func snap() -> void:
     if target:
+        # A teleport can occur between ticks while interpolation still holds the old pose.
+        snap_through_physics_frame=Engine.get_physics_frames()+1
         global_position=target.global_position+Vector3(0,1.4 if on_foot else settings.follow_height,0)
         rotation.y=foot_yaw if on_foot else heading(target.global_transform)+orbit_yaw
         arm.spring_length=zoom_distance;arm.rotation.x=pitch;arm.position.x=.38 if on_foot else 0.0
@@ -44,6 +47,7 @@ func zoom_by(steps: float) -> void:
 func _process(delta: float) -> void:
     if target==null:return
     var pose: Transform3D=target.get_global_transform_interpolated()
+    if Engine.get_physics_frames()<=snap_through_physics_frame:pose=target.global_transform
     global_position=global_position.lerp(pose.origin+Vector3(0,(1.55 if sniper_scope else 1.4) if on_foot else settings.follow_height,0),1-exp(-delta*9))
     var desired_fov: float=22.0 if sniper_scope else (48.0 if on_foot and aiming else settings.field_of_view)
     camera.fov=lerpf(camera.fov,desired_fov,1-exp(-delta*14))

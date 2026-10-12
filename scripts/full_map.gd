@@ -12,6 +12,8 @@ var close_button: Button
 var side_body: Control
 var zoom_controls: Control
 var selection: Dictionary = {}
+var rendering_suspended: bool = false
+var previous_disable_3d: bool = false
 func _ready() -> void:
     mouse_filter=Control.MOUSE_FILTER_STOP
     theme=GameUI.theme()
@@ -45,7 +47,23 @@ func _ready() -> void:
     var guide:=GameUI.label(self,"SCROLL  ZOOM     /     RIGHT DRAG  PAN     /     M  CLOSE",Vector2.ZERO,14,GameUI.WHITE,true)
     guide.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT);guide.offset_left=-540;guide.offset_top=-34;guide.offset_right=-28;guide.offset_bottom=-8
     resized.connect(_layout);side_body.resized.connect(_layout_side)
+    visibility_changed.connect(_sync_world_rendering)
     _layout();hide()
+
+func _sync_world_rendering() -> void:
+    if is_visible_in_tree():
+        if not rendering_suspended:
+            previous_disable_3d=get_viewport().disable_3d
+            rendering_suspended=true
+            get_viewport().disable_3d=true
+    elif rendering_suspended:
+        get_viewport().disable_3d=previous_disable_3d
+        rendering_suspended=false
+
+func _exit_tree() -> void:
+    if rendering_suspended:
+        get_viewport().disable_3d=previous_disable_3d
+        rendering_suspended=false
 func _layout() -> void:
     if not is_instance_valid(canvas):return
     canvas.position=Vector2(28,110)

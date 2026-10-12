@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://xywvy2xkcacv"]
+
 [ext_resource type="ArrayMesh" path="res://assets/nature/meshes/BirchTree_4.res" id="1"]
-[node name="BirchTree_4" type="MeshInstance3D"]
-mesh=ExtResource("1")
+
+[node name="BirchTree_4" type="MeshInstance3D" unique_id=1796455779]
+mesh = ExtResource("1")
