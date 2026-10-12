@@ -1,4 +1,11 @@
 extends CanvasLayer
+var actor: CharacterBody3D
+var driving: bool=true
+var mode_label: Label
+var footer_reset_label: Label
+var interaction_label: Label
+var foot_hints: Control
+var combat_hud: Control
 var cart: CharacterBody3D
 var park: Node3D
 var root: Control
@@ -26,13 +33,17 @@ func _ready() -> void:
     root.theme=GameUI.theme();add_child(root)
     GameUI.label(root,"SAMI PARK",Vector2(32,22),33,GameUI.WHITE,true)
     var tag:=_plate(root,Vector2(32,66),Vector2(110,23),GameUI.LIME)
-    GameUI.label(tag,"FREE DRIVE",Vector2(11,0),16,GameUI.INK,true)
+    mode_label=GameUI.label(tag,"FREE DRIVE",Vector2(11,0),16,GameUI.INK,true)
     area_label=GameUI.label(root,"ENGLISH DOOR",Vector2(155,65),17,GameUI.WHITE,true)
     driving_hints=Control.new();driving_hints.position=Vector2(32,105);root.add_child(driving_hints)
     GameUI.keycap(driving_hints,"WASD",Vector2.ZERO,62)
     GameUI.label(driving_hints,"DRIVE",Vector2(74,3),16)
     GameUI.keycap(driving_hints,"SPACE",Vector2(147,0),67)
     GameUI.label(driving_hints,"BRAKE / DRIFT",Vector2(226,3),16)
+    foot_hints=Control.new();foot_hints.position=Vector2(32,105);root.add_child(foot_hints);foot_hints.hide()
+    GameUI.keycap(foot_hints,"WASD",Vector2.ZERO,62);GameUI.label(foot_hints,"MOVE",Vector2(74,3),16)
+    GameUI.keycap(foot_hints,"SPACE",Vector2(147,0),67);GameUI.label(foot_hints,"JUMP",Vector2(226,3),16)
+    GameUI.keycap(foot_hints,"SHIFT",Vector2(300,0),67);GameUI.label(foot_hints,"RUN",Vector2(379,3),16)
     gauge=load("res://scenes/speedometer.tscn").instantiate();root.add_child(gauge)
     gauge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
     gauge.offset_left=-308;gauge.offset_top=-290;gauge.offset_right=-18;gauge.offset_bottom=-30
@@ -50,7 +61,14 @@ func _ready() -> void:
     footer.offset_left=-201;footer.offset_top=-52;footer.offset_right=230;footer.offset_bottom=-24
     for entry in [["M","MAP",0,32],["ESC","MENU",122,42],["R","RESET",266,32]]:
         GameUI.keycap(footer,entry[0],Vector2(entry[2],0),entry[3])
-        GameUI.label(footer,entry[1],Vector2(entry[2]+entry[3]+11,3),16,GameUI.WHITE,true)
+        var caption:=GameUI.label(footer,entry[1],Vector2(entry[2]+entry[3]+11,3),16,GameUI.WHITE,true)
+        if entry[0]=="R":footer_reset_label=caption
+    interaction_label=GameUI.label(root,"",Vector2.ZERO,20,GameUI.WHITE,true)
+    interaction_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+    interaction_label.offset_left=-280;interaction_label.offset_top=-93;interaction_label.offset_right=280;interaction_label.offset_bottom=-63
+    interaction_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    combat_hud=Control.new();combat_hud.set_script(load("res://scripts/combat_hud.gd"));root.add_child(combat_hud)
+    combat_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);combat_hud.hide()
     var credit:=GameUI.label(root,"\u00a9 OpenStreetMap contributors",Vector2.ZERO,11,GameUI.MUTED)
     credit.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
     credit.offset_left=-110;credit.offset_top=-21;credit.offset_right=180;credit.offset_bottom=-3
@@ -62,7 +80,7 @@ func _ready() -> void:
     toast_label.size=Vector2(470,36);toast_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
     pause_overlay=load("res://scenes/game_menu.tscn").instantiate();root.add_child(pause_overlay)
     pause_overlay.resume_requested.connect(func():set_paused(false))
-    pause_overlay.recover_requested.connect(func():cart.recover();set_paused(false))
+    pause_overlay.recover_requested.connect(func():get_parent().recover_active();set_paused(false))
     pause_overlay.map_requested.connect(open_map)
     pause_overlay.density_requested.connect(_set_density)
     pause_overlay.quit_requested.connect(func():get_tree().quit())
@@ -72,11 +90,9 @@ func _ready() -> void:
 func _plate(parent: Node, point: Vector2, dimensions: Vector2, color: Color) -> Control:
     var panel:=Control.new();panel.set_script(load("res://scripts/game_plate.gd"));panel.position=point;panel.size=dimensions;panel.fill=color;parent.add_child(panel);return panel
 func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
-    cart=vehicle;park=world
+    cart=vehicle;actor=vehicle;park=world
     gauge.initialize(vehicle);map.initialize(vehicle,world);full_map.initialize(vehicle,world)
     landmarks=JSON.parse_string(FileAccess.get_file_as_string("res://data/map_labels.json"))
-    cart.recovered.connect(show_toast)
-    cart.rollover_started.connect(func():show_toast("CART ROLLING   /   R TO RESET"))
     show_toast("ENGLISH DOOR   /   FREE DRIVE")
 func show_toast(message: String) -> void:
     toast_label.text=message.to_upper()
@@ -88,21 +104,23 @@ func set_paused(value: bool) -> void:
     var show_menu:=value and (not is_instance_valid(full_map) or not full_map.visible)
     pause_overlay.visible=show_menu
     if show_menu:pause_overlay.open(park.vegetation_density)
-    Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+    _restore_mouse()
     get_tree().current_scene.get_node("ChaseCamera").dragging=false
+    _suppress_fire()
 func open_map() -> void:
     if full_map.visible:return
     map_was_paused=get_tree().paused
     get_tree().paused=true;pause_overlay.hide()
     Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
     get_tree().current_scene.get_node("ChaseCamera").dragging=false
+    _suppress_fire()
     full_map.open()
 func close_map() -> void:
     full_map.hide();get_tree().paused=map_was_paused;pause_overlay.visible=map_was_paused
     if map_was_paused:pause_overlay.open(park.vegetation_density)
-    Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+    _restore_mouse();_suppress_fire()
 func _map_spawn(point: Vector2, yaw: float) -> void:
-    cart.teleport_to(point,yaw);map_was_paused=false;close_map()
+    get_parent().teleport_active(point,yaw);map_was_paused=false;close_map()
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventKey and event.echo:return
     if event.is_action_pressed("map_toggle"):
@@ -118,10 +136,12 @@ func _process(delta: float) -> void:
     status_label.text="DRIFT" if cart.drifting else ("REVERSE" if cart.speed<-.1 else ("" if cart.on_path else "OFF ROAD"))
     if cart.rolling:status_label.text="R  /  RESET CART"
     status_label.modulate=GameUI.RED if cart.rolling else (Color("ffbc55") if cart.drifting else GameUI.LIME)
-    trip_label.text="%.2f KM EXPLORED" % (cart.distance_m/1000.0)
+    trip_label.text="%.2f KM EXPLORED" % ((cart.distance_m+get_parent().get_node("WalkPlayer").distance_m)/1000.0)
+    interaction_label.text=get_parent().interaction_text()
     if not get_tree().paused:
         tutorial_time+=delta
         driving_hints.modulate.a=clampf((19-tutorial_time)/2,0,1)
+        foot_hints.modulate.a=driving_hints.modulate.a
         toast_time=maxf(0,toast_time-delta)
         toast_plate.visible=toast_time>0;toast_label.visible=toast_time>0
         toast_plate.modulate.a=minf(1,toast_time*3)
@@ -131,7 +151,7 @@ func _process(delta: float) -> void:
             var nearest:=130.0
             area_label.text="ERBIL / KURDISTAN"
             for entry: Dictionary in landmarks:
-                var distance:=Vector2(cart.position.x,cart.position.z).distance_to(Vector2(entry.position[0],entry.position[1]))
+                var distance:=Vector2(actor.global_position.x,actor.global_position.z).distance_to(Vector2(entry.position[0],entry.position[1]))
                 if distance<nearest:nearest=distance;area_label.text=str(entry.name).to_upper()
         elapsed+=delta
         if elapsed>12:
@@ -142,3 +162,20 @@ func _set_density(value: float) -> void:
     park.vegetation_density=value;park.set_visible_tree_fraction(value)
     pause_overlay.set_detail(value)
 func _toggle_density() -> void:_set_density(.45 if park.vegetation_density>.6 else 1.0)
+
+func set_context(person: CharacterBody3D, in_vehicle: bool) -> void:
+    actor=person;driving=in_vehicle
+    if driving:cart=person;gauge.initialize(person)
+    gauge.visible=driving;driving_hints.visible=driving;foot_hints.visible=not driving
+    mode_label.text="FREE DRIVE" if driving else "ON FOOT"
+    footer_reset_label.text="RESET" if driving else "RELOAD"
+    map.cart=actor;full_map.cart=actor;full_map.canvas.cart=actor
+    combat_hud.player=get_parent().get_node("WalkPlayer");combat_hud.game=get_parent();combat_hud.visible=not driving
+    pause_overlay.set_context(driving)
+    tutorial_time=0
+    _restore_mouse();_suppress_fire()
+func _restore_mouse() -> void:
+    Input.mouse_mode=Input.MOUSE_MODE_CAPTURED if not driving and not get_tree().paused else Input.MOUSE_MODE_VISIBLE
+func _suppress_fire() -> void:
+    var player: Node=get_parent().get_node_or_null("WalkPlayer")
+    if player and is_instance_valid(player.weapons):player.weapons.suppress_until_release=true

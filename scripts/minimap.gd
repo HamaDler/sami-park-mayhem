@@ -38,6 +38,10 @@ func _draw() -> void:
     draw_polyline(mapped(park.running_track.centerline),Color("d47760"),1.4,true)
     for lake in lakes:draw_colored_polygon(mapped(lake),Color("477f95"))
     for court in sports:draw_colored_polygon(mapped(court),Color("9bb6c9"))
+    if cart.is_in_group("walk_player"):
+        for access: Node3D in get_tree().get_nodes_in_group("vehicles"):
+            var vehicle_point:=project(Vector2(access.vehicle.global_position.x,access.vehicle.global_position.z))
+            draw_rect(Rect2(vehicle_point-Vector2(3,2),Vector2(6,4)),Color("8bcbd4"))
     var point:=project(Vector2(cart.global_position.x,cart.global_position.z))
     var forward: Vector2=Vector2(-cart.global_basis.z.x,-cart.global_basis.z.z).normalized()
     var side:=Vector2(-forward.y,forward.x)

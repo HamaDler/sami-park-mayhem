@@ -1,0 +1,40 @@
+{
+  "weapons": [
+    {
+      "slot": 1,
+      "name": "PISTOL",
+      "automatic": false,
+      "magazine": 12,
+      "interval": 0.24,
+      "reload_seconds": 1.2,
+      "damage": 24,
+      "range": 120,
+      "recoil": 0.016,
+      "aim_sensitivity_multiplier": 0.7
+    },
+    {
+      "slot": 2,
+      "name": "AUTOMATIC RIFLE",
+      "automatic": true,
+      "magazine": 30,
+      "interval": 0.1,
+      "reload_seconds": 1.7,
+      "damage": 16,
+      "range": 230,
+      "recoil": 0.022,
+      "aim_sensitivity_multiplier": 0.55
+    },
+    {
+      "slot": 3,
+      "name": "SNIPER",
+      "automatic": false,
+      "magazine": 5,
+      "interval": 1.15,
+      "reload_seconds": 2.0,
+      "damage": 85,
+      "range": 650,
+      "recoil": 0.06,
+      "aim_sensitivity_multiplier": 0.2
+    }
+  ]
+}

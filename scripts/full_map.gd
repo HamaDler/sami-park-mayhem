@@ -38,7 +38,7 @@ func _ready() -> void:
     GameUI.button(zoom_controls,"-",Vector2(0,36),Vector2(125,40),func():canvas.zoom_at(1.0/1.4,canvas.size*.5))
     GameUI.button(zoom_controls,"+",Vector2(133,36),Vector2(125,40),func():canvas.zoom_at(1.4,canvas.size*.5))
     GameUI.button(zoom_controls,"FIT PARK",Vector2(0,87),Vector2(258,42),func():canvas.fit_park())
-    GameUI.button(zoom_controls,"LOCATE CART",Vector2(0,140),Vector2(258,42),func():canvas.find_cart())
+    GameUI.button(zoom_controls,"LOCATE PLAYER",Vector2(0,140),Vector2(258,42),func():canvas.find_cart())
     close_button=GameUI.button(self,"ESC  BACK",Vector2.ZERO,Vector2(170,46),func():close_requested.emit())
     var credits:=GameUI.label(self,"\u00a9 OpenStreetMap contributors / ODbL 1.0",Vector2.ZERO,12,GameUI.MUTED)
     credits.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT);credits.offset_left=28;credits.offset_top=-34;credits.offset_right=540;credits.offset_bottom=-8
@@ -64,7 +64,7 @@ func open() -> void:
     spawn_button.disabled=true;canvas.panning=false;canvas.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
     show();canvas.queue_redraw()
 func select_point(point: Vector2, quick_spawn: bool=false) -> void:
-    selection=park.resolve_map_spawn(point,cart.rotation.y,cart.get_rid())
+    selection=park.resolve_map_spawn(point,cart.rotation.y,cart.get_rid(),cart.is_in_group("walk_player"))
     canvas.selected=selection;canvas.requested_point=point;spawn_button.disabled=not selection.valid
     destination_label.modulate=GameUI.LIME if selection.valid else GameUI.RED
     if selection.valid:

@@ -1,6 +1,7 @@
 extends CharacterBody3D
 signal recovered(reason: String)
 signal rollover_started
+var control_enabled: bool=false
 var rolling: bool = false
 var rollover_risk: float = 0
 var lateral_acceleration: float = 0
@@ -33,6 +34,7 @@ var drift_kick_timer: float = 0.0
 func _ready() -> void:
     _build_cart()
     effects.initialize(self)
+    set_control_enabled(false)
 
 func initialize(world: Node3D) -> void:
     park = world
@@ -48,9 +50,14 @@ func initialize(world: Node3D) -> void:
 
 func _physics_process(delta: float) -> void:
     if park == null:return
-    if Input.is_action_just_pressed("recover"):recover("Back on the path")
+    if control_enabled and Input.is_action_just_pressed("recover"):recover("Back on the path")
     if rolling:
         _update_rollover(delta)
+        return
+    if not control_enabled:
+        speed=0;velocity.x=0;velocity.z=0
+        velocity.y=-.5 if is_on_floor() else velocity.y-20*delta
+        move_and_slide();effects.update_effects(delta,false)
         return
     on_path = park.is_on_path(global_position)
     var throttle := Input.get_axis("reverse","accelerate")
@@ -214,23 +221,10 @@ func _build_cart() -> void:
     _build_driver()
 
 func _build_driver() -> void:
-    var driver := Node3D.new()
+    var driver: Node3D=load("res://scenes/character_avatar.tscn").instantiate()
     driver.name="SeatedDriver"
-    driver.position=Vector3(0,-0.16,0.35)
     visual.add_child(driver)
-    var dark := ParkGeometry.material(Color("293b32"),0.65)
-    var skin := ParkGeometry.material(Color("b78c63"))
-    var shirt := ParkGeometry.material(Color("536e6b"))
-    var pants := ParkGeometry.material(Color("353b38"))
-    ParkGeometry.sphere(driver,Vector3(-0.31,1.23,0.05),Vector3(0.22,0.34,0.16),shirt)
-    ParkGeometry.sphere(driver,Vector3(-0.31,1.74,0.02),Vector3(0.135,0.17,0.13),skin)
-    ParkGeometry.sphere(driver,Vector3(-0.31,1.82,0.065),Vector3(0.14,0.12,0.13),dark)
-    for x in [-0.43,-0.18]:
-        ParkGeometry.line(driver,Vector3(x,0.95,0),Vector3(x,0.75,-0.4),0.075,pants)
-        ParkGeometry.line(driver,Vector3(x,0.75,-0.4),Vector3(x,0.44,-0.5),0.06,pants)
-    for x in [-0.5,-0.12]:
-        ParkGeometry.line(driver,Vector3(x,1.45,0),Vector3(x,1.27,-0.3),0.055,shirt)
-        ParkGeometry.line(driver,Vector3(x,1.27,-0.3),Vector3(x,1.26,-0.57),0.042,skin)
+    driver.set_seated(self)
 
 func _check_rollover(delta: float, handbrake: bool) -> void:
     var minimum:=settings.rollover_brake_min_speed if handbrake else settings.rollover_min_speed
@@ -287,5 +281,12 @@ func _stop_rollover() -> void:
     rollover_body=null
     rolling=false
     collision_layer=2
-    collision_mask=1
+    collision_mask=5
     upright_time=0
+
+func set_control_enabled(value: bool) -> void:
+    control_enabled=value
+    if not value:
+        speed=0;velocity=Vector3.ZERO;steer=0;visual.rotation.z=0;_reset_handling()
+    var driver: Node3D=visual.get_node("SeatedDriver")
+    driver.visible=value;driver.set_process(value)

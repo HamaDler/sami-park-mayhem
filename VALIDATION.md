@@ -1,4 +1,43 @@
-# Latest validation - northwestern running track - 2026-10-12
+# Latest validation - imported Quaternius weapons - 2026-10-12
+
+Replaced all three procedural weapon placeholders with the user's Pistol, Assault Rifle and Sniper Rifle GLBs. Original files and materials are preserved under CC0; source and bundled SHA-256 hashes match for all three.
+
+- Godot 4.7.1 headless editor import succeeds for all three assets. Models are self-contained, static GLBs with original materials. The three source meshes total 8,130 vertices; resources are shared between avatar instances.
+- Editable wrappers `scenes/weapons/pistol.tscn`, `rifle.tscn`, `sniper.tscn` apply a 0.16 scale and rotate the exported +X barrels toward game -Z. Per-model height corrections align the barrel centers. Right/left grip and muzzle markers are separate from source geometry. Muzzle markers sit approximately 8 mm beyond the measured barrel tips.
+- A direct runtime probe confirms each equipped Model is the correct imported GLB. Both wrist-to-grip distances stay below 4 mm across all three weapons at pitch -0.8, -0.18, 0 and 0.65 radians. Right-hand maximum is below 0.03 mm; the largest left-hand distance is 3.58 mm at the sniper's downward aiming limit.
+- Actual renderer captures of all three equipped guns and the sniper scope were inspected. Original colors, barrel directions, scale and hand placement are visible in the game. The driver and walking character remain the supplied Hoodie model.
+- `tests/player_validation.gd`: 34/34, covering switching, actual hitscan firing, reload, automatic rifle, sniper scope, pause/map travel and entering/exiting vehicles. `tests/weapon_pose_validation.gd`: 10/10 with 12,000 animation/weapon updates; maximum local bone scale change remains 0.0. Combined: 44 checks, zero failures.
+- Existing pistol/rifle/sniper aim-sensitivity multipliers remain 0.70/0.55/0.20. Magazines, firing rates, recoil and controls remain configured in `data/weapon_settings.json`.
+- No release ZIP updated.
+
+# Previous validation - weapon-hand mesh distortion fix - 2026-10-12
+
+Reproduced the reported distorted graphics after leaving the cart, switching weapons and repeatedly firing. The hand IK was writing complete global bone transforms every frame. Transform decomposition progressively changed local bone scales and arm lengths, stretching the skinned mesh. The correction writes normalized local bone rotations only; seated foot adjustment writes position only. Source model and animation scales remain intact.
+
+- Before/after rendered reproduction: 950 physics frames, 317 actual shots, rotating/moving character, vertical aiming and repeated weapon changes. Largest bone basis scale grew to **1.74134** before the fix; after the fix it stayed at **1.00000048**. Tracer width remained normal in both runs, identifying the character skin rather than bullet effects as the source.
+- `tests/weapon_pose_validation.gd`: **10/10**. Accelerates 12,000 real animation/IK updates (200 seconds of animation time) through all weapon slots, idle/run/strafe/backward/airborne poses, character turns, recoil and vertical aiming. Maximum local bone scale change is **0.0**; maximum arm segment length deviation is **0.00005464 m**. Also checks valid transforms, original weapon scale, firing all three weapons afterward, and pause-menu focus.
+- `tests/player_validation.gd`: **34/34** after the fix, including both seated hands on the steering wheel and feet above the floor, movement/jump, weapon firing/reload/scope, pause/map travel, recovery and second-vehicle interaction. Combined: **44 relevant checks, zero failures**.
+- Actual rendered character view after the accelerated stress test was inspected. The arms and hands stay at normal size, and the UI remains readable. No source GLB changes or release ZIP updates.
+
+Run the new test with `--path <project> --script res://tests/weapon_pose_validation.gd` in a rendered Godot instance. Bone rotation API reference: https://docs.godotengine.org/en/stable/classes/class_skeleton3d.html#class-skeleton3d-method-set-bone-pose-rotation
+
+# Previous validation - Hoodie character, walking, vehicles and weapons - 2026-10-12
+
+Godot 4.7.1, Windows, Compatibility renderer, NVIDIA GeForce RTX 5050.
+
+- `tests/player_validation.gd`: 34/34 in the actual renderer. Checks the supplied rigged GLB, driver hips/feet and both hands at the steering wheel; F exit/entry, grounded exits, mouse capture, contextual HUD/minimap, walking and jumping, parked cart behavior, interaction range, all three weapon slots, semi/automatic firing, damage receiver hits, reload/cooldown, sniper FOV, paused input, active-actor map travel, nearby tree collision streaming, water/world recovery, preserved loadout, and entering a second vehicle instance.
+- `tests/player_safety_validation.gd`: 18/18 in the actual renderer. Covers fallback to the right exit, refusing fully blocked exits, wall and parked-cart collisions, line-of-sight vehicle interaction, separate camera zoom limits and distance persistence, unobstructed scoped camera and restored avatar, preserved zoom after scope, and recovery/camera behavior on a second vehicle.
+- Existing regression tests: `tests/integration.gd` 36/36, `tests/game_ui_validation.gd` 24/24, and `tests/map_navigation.gd` 32/32. Combined: **144 checks, zero failures**. UI geometry remains valid at 1280x800, 1920x1080 and 3440x1440.
+- `tests/player_capture.gd` rendered the seated driver, on-foot chase view, three equipped weapons, sniper scope, jumping, and updated pause controls. These views were visually inspected; the magazine readouts show integer capacities, and the sniper camera hides the local avatar to avoid blocking its scope.
+- The supplied character has 24 animation clips. Idle/gun and walking/running/strafe clips are reused. There is no supplied jump animation; the airborne pose is an approximation. Seated pose and weapon grips are applied separately, preserving the source GLB.
+- Weapon meshes are original procedural placeholders. Ammo reserve is unlimited. There are no enemies or destructible scenery; collision hits call an optional generic damage receiver. Tracers and impact markers use a fixed 24-slot pool, and shot audio is generated locally. All gameplay remains offline.
+- Walking movement, camera and driver pose settings are in `data/player_settings.json`; weapon tuning is in `data/weapon_settings.json`. Vehicle interaction uses an editable shared scene and group registry, validated against a second cart instance.
+- Final editor import succeeds in Godot 4.7.1. Godot MCP run/debug/stop confirms a clean startup with no errors or warnings after type/name warning cleanup. The source and bundled Hoodie GLB have identical SHA-256 hashes.
+- No release ZIP updated.
+
+Run player validation with `--path <project> --script res://tests/player_validation.gd`, and safety validation with `--script res://tests/player_safety_validation.gd`. Do not use `--headless` for these two tests: they verify mouse capture and the actual camera, which the dummy display server does not implement. Existing driving/map/UI tests can run headlessly.
+
+# Previous validation - northwestern running track - 2026-10-12
 
 Godot 4.7.1, Windows, Compatibility renderer, NVIDIA GeForce RTX 5050.
 

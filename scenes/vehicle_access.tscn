@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/vehicle_access.gd" id="1"]
+[node name="VehicleAccess" type="Node3D"]
+script=ExtResource("1")
+[node name="ExitLeft" type="Marker3D" parent="."]
+position=Vector3(-1.8,0,0.25)
+[node name="ExitRight" type="Marker3D" parent="."]
+position=Vector3(1.8,0,0.25)
+[node name="ExitRear" type="Marker3D" parent="."]
+position=Vector3(0,0,2.25)

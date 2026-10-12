@@ -143,13 +143,13 @@ func _physics_process(delta: float) -> void:
     if lod_time>=.3:
         lod_time=0
         _update_lod()
-    var cart:=park.get_parent().get_node_or_null("GolfCart") as Node3D
+    var cart: Node3D=park.get_parent().get_active_actor() if park.get_parent().has_method("get_active_actor") else park.get_parent().get_node_or_null("GolfCart")
     if cart and (collider_time>=.2 or Vector2(cart.position.x,cart.position.z).distance_to(last_collision_position)>10):
         collider_time=0
         _update_colliders(Vector2(cart.position.x,cart.position.z))
 func refresh() -> void:
     _update_lod()
-    var cart:=park.get_parent().get_node_or_null("GolfCart") as Node3D
+    var cart: Node3D=park.get_parent().get_active_actor() if park.get_parent().has_method("get_active_actor") else park.get_parent().get_node_or_null("GolfCart")
     if cart:_update_colliders(Vector2(cart.position.x,cart.position.z))
 func _update_lod() -> void:
     var camera:=get_viewport().get_camera_3d()

@@ -258,7 +258,7 @@ func _entrance() -> void:
     welcome.rotation.y = PI
     board.add_child(welcome)
 
-func resolve_map_spawn(point: Vector2, current_yaw: float, excluded_body: RID) -> Dictionary:
+func resolve_map_spawn(point: Vector2, current_yaw: float, excluded_body: RID, walking: bool=false) -> Dictionary:
     var rejection := _map_land_rejection(point)
     if not rejection.is_empty():return {"valid":false,"reason":rejection,"position":point}
     var yaw := current_yaw
@@ -275,7 +275,10 @@ func resolve_map_spawn(point: Vector2, current_yaw: float, excluded_body: RID) -
     box.size=Vector3(1.7,1.9,3.0)
     var query:=PhysicsShapeQueryParameters3D.new()
     query.shape=box
-    query.collision_mask=1
+    if walking:
+        var capsule:=CapsuleShape3D.new();capsule.radius=.30;capsule.height=1.72
+        query.shape=capsule
+    query.collision_mask=3 if walking else 1
     query.exclude=[excluded_body]
     var candidates: Array[Vector2]=[point]
     for radius in [2.0,4.0,6.0,8.0]:
@@ -283,7 +286,7 @@ func resolve_map_spawn(point: Vector2, current_yaw: float, excluded_body: RID) -
             candidates.append(point+Vector2(cos(index*TAU/12),sin(index*TAU/12))*radius)
     for candidate in candidates:
         if not _map_land_rejection(candidate).is_empty():continue
-        query.transform=Transform3D(Basis(Vector3.UP,yaw),Vector3(candidate.x,1.1,candidate.y))
+        query.transform=Transform3D(Basis(Vector3.UP,yaw),Vector3(candidate.x,1.05 if walking else 1.1,candidate.y))
         if not get_world_3d().direct_space_state.intersect_shape(query,1).is_empty():continue
         if _map_tree_blocked(candidate):continue
         return {"valid":true,"position":candidate,"yaw":yaw,"reason":""}

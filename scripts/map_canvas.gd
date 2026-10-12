@@ -136,6 +136,12 @@ func _draw() -> void:
         if selected.valid:
             var heading:=Vector2(-sin(selected.yaw),-cos(selected.yaw))
             draw_line(marker,marker+heading*25,color,3,true)
+    if cart.is_in_group("walk_player"):
+        for access: Node3D in get_tree().get_nodes_in_group("vehicles"):
+            var vehicle_point:=world_to_map(Vector2(access.vehicle.global_position.x,access.vehicle.global_position.z))
+            draw_rect(Rect2(vehicle_point-Vector2(6,4),Vector2(12,8)),GameUI.INK)
+            draw_rect(Rect2(vehicle_point-Vector2(4,2),Vector2(8,4)),Color("8bcbd4"))
+            if zoom>2 and Rect2(Vector2(8,8),size-Vector2(16,16)).has_point(vehicle_point):_place_label(vehicle_point,access.display_name,"vehicle")
     var player:=world_to_map(Vector2(cart.global_position.x,cart.global_position.z))
     var direction:=Vector2(-sin(cart.rotation.y),-cos(cart.rotation.y))
     var sideways:=Vector2(-direction.y,direction.x)

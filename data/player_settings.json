@@ -1,0 +1,31 @@
+{
+  "walk_speed": 4.5,
+  "run_speed": 7.0,
+  "acceleration": 22.0,
+  "gravity": 20.0,
+  "jump_velocity": 6.5,
+  "standing_scale": 0.96,
+  "seated_scale": 0.88,
+  "camera_default_distance": 4.5,
+  "camera_min_distance": 2.2,
+  "camera_max_distance": 7.0,
+  "interaction_distance": 3.6,
+  "driver_body_anchor": [
+    -0.26,
+    0.78,
+    0.24
+  ],
+  "driver_ankles": [
+    [
+      -0.365,
+      0.34,
+      -0.14
+    ],
+    [
+      -0.155,
+      0.34,
+      -0.14
+    ]
+  ],
+  "mouse_sensitivity": 0.0035
+}

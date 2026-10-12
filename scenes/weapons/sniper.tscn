@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="PackedScene" path="res://assets/weapons/quaternius/sniper.glb" id="1"]
+[node name="Sniper" type="Node3D"]
+position=Vector3(0,0.04,0.1)
+rotation=Vector3(0,0.16,0)
+[node name="Model" parent="." instance=ExtResource("1")]
+position=Vector3(0,-0.0428854,0)
+rotation=Vector3(0,1.57079632679,0)
+scale=Vector3(0.16,0.16,0.16)
+[node name="GripRight" type="Marker3D" parent="."]
+position=Vector3(0,-0.086,0.047)
+[node name="GripLeft" type="Marker3D" parent="."]
+position=Vector3(-0.03,-0.042,-0.23)
+[node name="Muzzle" type="Marker3D" parent="."]
+position=Vector3(0,0,-0.848)

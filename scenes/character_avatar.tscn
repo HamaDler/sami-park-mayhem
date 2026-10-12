@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scripts/character_avatar.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/characters/hoodie/hoodie.glb" id="2"]
+[node name="CharacterAvatar" type="Node3D"]
+script=ExtResource("1")
+[node name="Model" parent="." instance=ExtResource("2")]
+rotation=Vector3(0,3.14159265359,0)
