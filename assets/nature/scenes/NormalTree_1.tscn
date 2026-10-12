@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/NormalTree_1.res" id="1"]
+[node name="NormalTree_1" type="MeshInstance3D"]
+mesh=ExtResource("1")

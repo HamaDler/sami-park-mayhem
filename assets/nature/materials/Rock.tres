@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/nature/textures/Rocks.png" id="1_3j86x"]
+
+[resource]
+resource_name = "Rock"
+cull_mode = 2
+albedo_color = Color(0.9, 0.87, 0.81, 1)
+albedo_texture = ExtResource("1_3j86x")

@@ -1,0 +1,88 @@
+[
+  {
+    "name": "English Door",
+    "position": [
+      -701.007,
+      -36.875
+    ],
+    "kind": "gate"
+  },
+  {
+    "name": "Divan Door",
+    "position": [
+      -491.754,
+      -605.95
+    ],
+    "kind": "gate",
+    "note": "Mapped western gate pair matched to the supplied annotated entrance screenshot."
+  },
+  {
+    "name": "Western loop",
+    "position": [
+      -328.944,
+      85.5385
+    ]
+  },
+  {
+    "name": "Central plaza",
+    "position": [
+      117.027,
+      -63.5085
+    ]
+  },
+  {
+    "name": "Lake 1",
+    "position": [
+      350.12145161290323,
+      -60.12309677419355
+    ],
+    "kind": "water"
+  },
+  {
+    "name": "Lake 2",
+    "position": [
+      415.48414285714284,
+      -198.4047012987013
+    ],
+    "kind": "water"
+  },
+  {
+    "name": "Martyrs Monument",
+    "position": [
+      585,
+      -104
+    ]
+  },
+  {
+    "name": "Padel courts",
+    "position": [
+      -535.28,
+      606.956
+    ],
+    "kind": "sport"
+  },
+  {
+    "name": "Volleyball",
+    "position": [
+      -494.333,
+      600.137
+    ],
+    "kind": "sport"
+  },
+  {
+    "name": "Basketball",
+    "position": [
+      -453.186,
+      590.856
+    ],
+    "kind": "sport"
+  },
+  {
+    "name": "Running track",
+    "position": [
+      -472,
+      -393
+    ],
+    "kind": "sport"
+  }
+]

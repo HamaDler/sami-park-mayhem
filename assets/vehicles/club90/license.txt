@@ -1,0 +1,11 @@
+Model Information:
+* title:	Club '90 - Low Poly model
+* source:	https://sketchfab.com/3d-models/club-90-low-poly-model-5c3f4d1c558746808711eb84ec4b5731
+* author:	Daniel Zhabotinsky (https://sketchfab.com/DanielZhabotinsky)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Club '90 - Low Poly model" (https://sketchfab.com/3d-models/club-90-low-poly-model-5c3f4d1c558746808711eb84ec4b5731) by Daniel Zhabotinsky (https://sketchfab.com/DanielZhabotinsky) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

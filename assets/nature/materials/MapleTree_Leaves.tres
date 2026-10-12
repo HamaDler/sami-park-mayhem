@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/nature/foliage.gdshader" id="1_py8yl"]
+[ext_resource type="Texture2D" path="res://assets/nature/textures/MapleTree_Leaves_BW.png" id="2_2itic"]
+
+[resource]
+resource_name = "MapleTree_Leaves"
+render_priority = 0
+shader = ExtResource("1_py8yl")
+shader_parameter/leaf_texture = ExtResource("2_2itic")
+shader_parameter/tint = Color(0.18, 0.36, 0.13, 1)
+shader_parameter/wind_strength = 0.055

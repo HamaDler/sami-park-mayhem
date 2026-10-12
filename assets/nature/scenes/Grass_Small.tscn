@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Grass_Small.res" id="1"]
+[node name="Grass_Small" type="MeshInstance3D"]
+mesh=ExtResource("1")

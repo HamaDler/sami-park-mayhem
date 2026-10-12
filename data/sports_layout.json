@@ -1,0 +1,125 @@
+{
+  "note": "Geometry from locally bundled OSM court footprints. User screenshot overrides older tennis tags: left is three padel courts, middle volleyball, right basketball. Individual fittings and standard playing areas are approximated within mapped parcels.",
+  "courts": [
+    {
+      "kind": "padel",
+      "label": "Padel courts",
+      "source_way": "550516487",
+      "center": [
+        -535.28,
+        606.956
+      ],
+      "yaw": 0.185196,
+      "size": [
+        26.004,
+        44.669
+      ],
+      "polygon": [
+        [
+          -552.168,
+          587.397
+        ],
+        [
+          -542.833,
+          585.649
+        ],
+        [
+          -526.617,
+          582.61
+        ],
+        [
+          -518.387,
+          626.515
+        ],
+        [
+          -543.947,
+          631.301
+        ],
+        [
+          -552.168,
+          587.397
+        ]
+      ]
+    },
+    {
+      "kind": "volleyball",
+      "label": "Volleyball",
+      "source_way": "550516490",
+      "center": [
+        -494.333,
+        600.137
+      ],
+      "yaw": 0.185196,
+      "size": [
+        26.002,
+        44.68
+      ],
+      "polygon": [
+        [
+          -511.218,
+          580.573
+        ],
+        [
+          -503.025,
+          579.037
+        ],
+        [
+          -485.667,
+          575.786
+        ],
+        [
+          -477.447,
+          619.702
+        ],
+        [
+          -502.998,
+          624.489
+        ],
+        [
+          -511.218,
+          580.573
+        ]
+      ]
+    },
+    {
+      "kind": "basketball",
+      "label": "Basketball",
+      "source_way": "550516492",
+      "center": [
+        -453.186,
+        590.856
+      ],
+      "yaw": 0.185196,
+      "size": [
+        26.0,
+        44.672
+      ],
+      "polygon": [
+        [
+          -470.071,
+          571.3
+        ],
+        [
+          -461.599,
+          569.708
+        ],
+        [
+          -444.52,
+          566.513
+        ],
+        [
+          -436.3,
+          610.418
+        ],
+        [
+          -461.85,
+          615.204
+        ],
+        [
+          -470.071,
+          571.3
+        ]
+      ]
+    }
+  ]
+}

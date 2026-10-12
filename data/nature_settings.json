@@ -1,0 +1,15 @@
+{
+  "seed": 20261011,
+  "chunk_size": 80,
+  "tree_detail_distance": 125,
+  "tree_draw_distance": 1200,
+  "grass_draw_distance": 85,
+  "garden_draw_distance": 180,
+  "stone_draw_distance": 650,
+  "collision_radius": 62,
+  "max_active_tree_colliders": 320,
+  "source_note": "Planting density zones interpreted from the user satellite image. Species, individual positions, grass, flowers, and stones are approximate landscaping.",
+  "grass_close_distance": 36,
+  "grass_tile_size": 16,
+  "grass_close_spacing": 0.95
+}
