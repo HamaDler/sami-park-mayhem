@@ -55,6 +55,7 @@ func run() -> void:
     await frames(3)
     check(zombie.head_box.collision_layer==32 and zombie.body_box.collision_layer==16,"Separate head and body damage layers")
     var before_money: int=survival.dinars;var before_score: int=survival.score
+    zombie.health=100 # Isolate the base headshot rule from randomized archetype health.
     survival.damage_zombie(zombie,50,true,"gun",zombie.global_position)
     check(not zombie.alive and survival.kills==1,"Double headshot damage kills a 100-health zombie")
     check(survival.dinars==before_money+150 and survival.score==before_score+150,"Headshot rewards")

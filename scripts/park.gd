@@ -13,6 +13,7 @@ var tree_positions := PackedVector2Array()
 var nature: Node3D
 var sports: Node3D
 var running_track: Node3D
+var perimeter_fence: Node3D
 var tree_colliders: Array[StaticBody3D] = []
 var rng := RandomNumberGenerator.new()
 var grass := ParkGeometry.material(Color("719954"))
@@ -29,6 +30,9 @@ func _ready() -> void:
     add_child(running_track)
     _ground_and_paths()
     _water_and_buildings()
+    perimeter_fence=load("res://scenes/perimeter_fence.tscn").instantiate()
+    add_child(perimeter_fence)
+    perimeter_fence.build(boundary)
     sports=load("res://scenes/sports_area.tscn").instantiate()
     add_child(sports)
     _vegetation()

@@ -15,6 +15,7 @@ func run() -> void:
     game.hud.elapsed=-10000
     game.player.teleport_to(Vector2(195.8739,-39.85362),-1.889);game.camera_rig.foot_yaw=-1.889;game.camera_rig.snap()
     s.wave.begin_next();s.wave.total=1000;s.wave.active_limit=80
+    s.missions.start_mission(1)
     for count in [0,40,80]:
         var attempts: int=0
         while s.enemies.living().size()<count and attempts<600:
@@ -30,6 +31,9 @@ func run() -> void:
         var sum: float=0
         for value in timings:sum+=value
         var report: Dictionary={"requested_zombies":count,"living_zombies":s.enemies.living().size(),"average_fps":1000/(sum/timings.size()),"p95_frame_ms":timings[int(timings.size()*.95)],"memory_mib":Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0,"vegetation_density":game.park.vegetation_density,"frames":timings.size()}
+        var kinds: Dictionary={}
+        for zombie in s.enemies.living():kinds[zombie.archetype]=int(kinds.get(zombie.archetype,0))+1
+        report.archetypes=kinds;report.supply_mission_active=s.missions.active
         reports.append(report);print("BENCHMARK ",JSON.stringify(report))
         await RenderingServer.frame_post_draw
         root.get_texture().get_image().save_png(OUT+"/survival-performance-%d.png" % count)

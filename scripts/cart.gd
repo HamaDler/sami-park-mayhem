@@ -308,6 +308,7 @@ func set_control_enabled(value: bool) -> void:
     driver.visible=value;driver.set_process(value)
 func receive_damage(amount: float) -> void:
     if health<=0 or amount<=0:return
+    if survival and is_instance_valid(survival.upgrades):amount*=survival.upgrades.damage_received
     health=maxf(0,health-amount)
     if survival:survival.recovery_time=0
     if health==0:

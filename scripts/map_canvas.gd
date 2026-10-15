@@ -199,10 +199,14 @@ func _draw_overlay() -> void:
             overlay.draw_rect(Rect2(vehicle_point-Vector2(4,2),Vector2(8,4)),Color("8bcbd4"))
             if zoom>2 and Rect2(Vector2(8,8),size-Vector2(16,16)).has_point(vehicle_point):_place_label(vehicle_point,access.display_name,"vehicle")
     if survival:
+        if survival.missions.active:
+            var mission_point:=world_to_map(survival.missions.position_2d)
+            overlay.draw_arc(mission_point,10,0,TAU,4,Color("64e2f0"),3,true)
+            if Rect2(Vector2(10,10),size-Vector2(20,20)).has_point(mission_point):_place_label(mission_point,"SUPPLIES / "+survival.missions.location_name,"mission")
         for station in survival.stations:
             var marker:=world_to_map(Vector2(station.global_position.x,station.global_position.z))
             overlay.draw_rect(Rect2(marker-Vector2(6,5),Vector2(12,10)),Color("ffd268"))
-            if Rect2(Vector2(10,10),size-Vector2(20,20)).has_point(marker):_place_label(marker,"BOX / "+station.display_name,"box")
+            if Rect2(Vector2(10,10),size-Vector2(20,20)).has_point(marker):_place_label(marker,"BOX + WORKSHOP / "+station.display_name,"box")
         if survival.wave.running and survival.wave.spawned>=survival.wave.total and survival.wave.remaining()<=5:
             for zombie in survival.enemies.living():overlay.draw_circle(world_to_map(Vector2(zombie.global_position.x,zombie.global_position.z)),5,GameUI.RED)
     var player:=world_to_map(Vector2(cart.global_position.x,cart.global_position.z))

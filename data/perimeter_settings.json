@@ -1,0 +1,11 @@
+{
+  "height": 4.2,
+  "base_height": 0.3,
+  "collision_thickness": 0.65,
+  "post_spacing": 3.2,
+  "bar_spacing": 0.5,
+  "max_segment_length": 24.0,
+  "chunk_size": 64.0,
+  "metal_color": "34483d",
+  "base_color": "a99d83"
+}

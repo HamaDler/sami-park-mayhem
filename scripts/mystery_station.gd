@@ -30,16 +30,23 @@ func initialize(session: Node3D, location: String) -> void:
     ParkGeometry.box(repair,Vector3(0,.6,0),Vector3(1.2,1.2,.7),metal,true)
     _sign(repair,"CART REPAIR  /  %d IQD" % int(survival.config.economy.repair_price),Vector3(0,2.1,0),Color("9deb91"))
     actions.append({"kind":"repair","position":repair.position,"station":self})
+    var workshop:=Node3D.new();workshop.position=Vector3(3.8,0,4.8);add_child(workshop)
+    ParkGeometry.box(workshop,Vector3(0,.6,0),Vector3(1.5,1.2,.7),metal,true)
+    ParkGeometry.box(workshop,Vector3(0,1.25,0),Vector3(1.6,.12,.9),gold)
+    _sign(workshop,"CART WORKSHOP\nBUMPER / ARMOR / HANDLING",Vector3(0,2.2,0),Color("c5ed55"))
+    actions.append({"kind":"upgrade","position":workshop.position,"station":self})
 func _sign(parent: Node3D, text: String, point: Vector3, color: Color) -> Label3D:
     var label:=Label3D.new();label.text=text;label.position=point;label.font=GameUI.bold();label.font_size=32;label.pixel_size=.008
     label.modulate=color;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;parent.add_child(label);return label
 func prompt(kind: String) -> String:
+    if kind=="upgrade":return "F  /  CART WORKSHOP"
     if kind=="ammo":return "F  /  REFILL AMMO   %d IQD" % int(survival.config.economy.ammo_price)
     if kind=="repair":return "F  /  REPAIR CART   %d IQD   [%ds]" % [int(survival.config.economy.repair_price),ceili(survival.config.economy.repair_seconds)]
     if rolling:return "MYSTERY BOX OPENING…"
     if not reward.is_empty():return "F  /  CLAIM "+survival.weapon_title(int(reward.slot),int(reward.tier))
     return "F  /  MYSTERY BOX   %d IQD" % int(survival.config.economy.box_price)
 func use(kind: String) -> void:
+    if kind=="upgrade":survival.game.hud.survival_overlay.workshop.open(survival,self);return
     if kind=="box" and rolling:return
     var economy: Dictionary=survival.config.economy
     if kind=="ammo":

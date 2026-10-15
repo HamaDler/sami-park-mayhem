@@ -1,0 +1,6 @@
+{
+  "service_distance":16.0,
+  "bumper":{"name":"REINFORCED BUMPER","description":"Harder roadkills. Less wear from ramming.","costs":[1000,1800,3000],"ram_damage":[1.0,1.3,1.7,2.2],"ram_wear":[1.0,0.8,0.55,0.3]},
+  "armor":{"name":"CART ARMOR","description":"More durability. Reduced incoming damage.","costs":[1500,2500,4000],"health":[1.0,1.35,1.7,2.1],"damage_received":[1.0,0.9,0.8,0.7]},
+  "handling":{"name":"HANDLING KIT","description":"More grip, stronger brakes, better stability.","costs":[1200,2200,3500],"grip":[1.0,1.15,1.35,1.55],"brakes":[1.0,1.1,1.2,1.35],"stability":[1.0,1.1,1.25,1.4]}
+}

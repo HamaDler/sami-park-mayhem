@@ -25,6 +25,8 @@ var ram_hits: Dictionary={}
 @onready var wave: Node=$Waves
 @onready var enemies: Node3D=$Enemies
 @onready var rewards: Node3D=$Rewards
+@onready var upgrades: Node=$Upgrades
+@onready var missions: Node3D=$Missions
 func initialize(parent_game: Node3D) -> void:
     game=parent_game
     config=JSON.parse_string(FileAccess.get_file_as_string("res://data/survival_settings.json"))
@@ -39,8 +41,10 @@ func initialize(parent_game: Node3D) -> void:
     cart.destroyed.connect(_cart_destroyed)
     cart.rollover_started.connect(func():cart.receive_damage(80))
     previous_cart_position=cart.global_position
+    upgrades.initialize(self)
     _build_stations()
     enemies.navigation._static_obstacles($Stations)
+    missions.initialize(self)
     announce("SURVIVE SAMI PARK  /  WAVE 1 IN %ds" % ceili(wave.preparation))
 func _build_stations() -> void:
     var locations: Array=JSON.parse_string(FileAccess.get_file_as_string("res://data/survival_locations.json"))
@@ -60,7 +64,7 @@ func _station_placement(anchor: Vector2) -> Dictionary:
             if not enemies.navigation.valid_spawn(center) or game.park.path_distance(center)>14:continue
             for quarter in 4:
                 var yaw: float=quarter*PI*.5;var basis:=Basis(Vector3.UP,yaw);var clear:=true
-                for local: Vector3 in [Vector3.ZERO,Vector3(3.8,0,0),Vector3(0,0,4.8)]:
+                for local: Vector3 in [Vector3.ZERO,Vector3(3.8,0,0),Vector3(0,0,4.8),Vector3(3.8,0,4.8)]:
                     var offset: Vector3=basis*local;var site:=center+Vector2(offset.x,offset.z)
                     var approach_offset: Vector3=basis*Vector3(0,0,-2)
                     var approach:=site+Vector2(approach_offset.x,approach_offset.z)
@@ -72,6 +76,7 @@ func _station_placement(anchor: Vector2) -> Dictionary:
 func _physics_process(delta: float) -> void:
     if not game or over:return
     wave.tick(delta)
+    missions.tick(delta)
     since_damage+=delta;damage_flash=maxf(0,damage_flash-delta);hit_flash=maxf(0,hit_flash-delta)
     if since_damage>=float(config.player.regeneration_delay):health=minf(float(config.player.max_health),health+float(config.player.regeneration_per_second)*delta)
     cart_damage_time=maxf(0,cart_damage_time-delta)
@@ -82,6 +87,9 @@ func _wave_completed(number: int) -> void:
 func damage_zombie(zombie: CharacterBody3D, amount: float, headshot: bool, cause: String, point: Vector3) -> void:
     if over or not zombie.alive or amount<=0:return
     var applied:=amount*(float(config.weapons.headshot_multiplier) if headshot else 1.0)
+    var type: Dictionary=enemies.types.get(zombie.archetype,{})
+    if cause=="gun" and not headshot:applied*=float(type.get("body_multiplier",1.0))
+    elif cause=="ram":applied*=float(type.get("ram_multiplier",1.0))
     zombie.health-=applied;zombie.alerted=true
     if cause=="gun":hit_flash=.16;last_hit_headshot=headshot;zombie.hit_time=.12
     if zombie.health>0:return
@@ -99,6 +107,7 @@ func damage_target(amount: float) -> void:
 func damage_player(amount: float) -> void:
     if over or amount<=0:return
     health=maxf(0,health-amount);since_damage=0;damage_flash=.35
+    if game.hud.survival_overlay:game.hud.survival_overlay.workshop.close()
     action.clear();action_progress=0;recovery_time=0;player_damaged.emit(amount)
     if health<=0:end_run()
 func end_run() -> void:
@@ -181,8 +190,8 @@ func _cart_impacts(delta: float) -> void:
         var now:=Time.get_ticks_msec()
         if now-int(ram_hits.get(zombie.id,-2000))<1000:continue
         ram_hits[zombie.id]=now
-        damage_zombie(zombie,speed*float(config.cart.ram_damage_per_metre_second),false,"ram",zombie.global_position)
-        cart.receive_damage(float(config.cart.ram_wear))
+        damage_zombie(zombie,speed*float(config.cart.ram_damage_per_metre_second)*upgrades.ram_damage,false,"ram",zombie.global_position)
+        cart.receive_damage(float(config.cart.ram_wear)*upgrades.ram_wear)
 func _cart_destroyed() -> void:
     announce("CART DISABLED — FIND A REPAIR STATION")
     if game.is_driving():game.exit_vehicle(true)

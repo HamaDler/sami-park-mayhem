@@ -1,6 +1,7 @@
 extends CharacterBody3D
 signal recovered(reason: String)
 var active: bool=false
+var movement_locked: bool=false
 var park: Node3D
 var camera_rig: Node3D
 var settings: Dictionary
@@ -40,6 +41,7 @@ func recover(reason: String="Returned to safe ground") -> void:
 func _physics_process(delta: float) -> void:
     if not active or park==null:return
     var input:=Input.get_vector("left","right","accelerate","reverse")
+    if movement_locked:input=Vector2.ZERO
     var direction: Vector3=camera_rig.global_basis.x*input.x+camera_rig.global_basis.z*input.y
     direction.y=0;direction=direction.normalized()
     var speed: float=settings.run_speed if Input.is_action_pressed("sprint") and not weapons.aiming else settings.walk_speed
@@ -47,7 +49,7 @@ func _physics_process(delta: float) -> void:
     velocity.z=move_toward(velocity.z,direction.z*speed,float(settings.acceleration)*delta)
     if is_on_floor():
         velocity.y=-.5
-        if Input.is_action_just_pressed("jump"):velocity.y=settings.jump_velocity
+        if not movement_locked and Input.is_action_just_pressed("jump"):velocity.y=settings.jump_velocity
     else:velocity.y-=float(settings.gravity)*delta
     if weapons.selected_slot>0:rotation.y=lerp_angle(rotation.y,camera_rig.foot_yaw,1-exp(-delta*18))
     elif direction.length_squared()>.01:rotation.y=lerp_angle(rotation.y,atan2(-direction.x,-direction.z),1-exp(-delta*14))

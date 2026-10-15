@@ -40,6 +40,7 @@ func _setup_inputs() -> void:
         var event:=InputEventMouseButton.new();event.button_index=MOUSE_BUTTON_LEFT if action=="fire" else MOUSE_BUTTON_RIGHT
         if not InputMap.action_has_event(action,event):InputMap.action_add_event(action,event)
 func _unhandled_input(event: InputEvent) -> void:
+    if player.movement_locked:return
     if get_tree().paused or (survival and survival.over) or (event is InputEventKey and event.echo):return
     if event.is_action_pressed("interact"):
         if is_driving():exit_vehicle()

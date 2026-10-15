@@ -9,8 +9,11 @@ var next_id: int=1
 var spawn_clock: float=0
 var positions: Dictionary={}
 var refresh_clock: float=0
+var types: Dictionary
+var scream_notice: float=0
 func initialize(session: Node) -> void:
     survival=session;settings=survival.config.zombies;random.randomize()
+    types=JSON.parse_string(FileAccess.get_file_as_string("res://data/zombie_types.json"))
     navigation=Node.new();navigation.set_script(load("res://scripts/zombie_navigation.gd"));navigation.name="ParkNavigation";add_child(navigation)
     navigation.initialize(survival.game.park)
     for path: String in survival.config.models:models.append(load(path))
@@ -23,6 +26,7 @@ func living() -> Array[CharacterBody3D]:
     return result
 func _physics_process(delta: float) -> void:
     if not survival or survival.over:return
+    scream_notice=maxf(0,scream_notice-delta)
     refresh_clock-=delta
     if refresh_clock<=0:
         refresh_clock=.15;positions.clear()
@@ -45,15 +49,43 @@ func spawn_one() -> CharacterBody3D:
     if not survival.wave.can_spawn(living().size()):return null
     var candidate:=spawn_position()
     if candidate==Vector2.INF:return null
+    var kind:=roll_type(maxi(1,survival.wave.number))
+    var model_index: int=types[kind].model
     var zombie: CharacterBody3D=null
     for item in pool:
-        if not item.alive and not item.visible:zombie=item;break
+        if not item.alive and not item.visible and item.model_index==model_index:zombie=item;break
     if zombie==null:
         zombie=load("res://scenes/zombie.tscn").instantiate();add_child(zombie)
-        var variant: int=pool.size()%models.size();zombie.build(self,models[variant],variant);pool.append(zombie)
-    zombie.activate(candidate,next_id,stats(maxi(1,survival.wave.number)))
+        zombie.build(self,models[model_index],model_index);pool.append(zombie)
+    zombie.activate(candidate,next_id,type_stats(maxi(1,survival.wave.number),kind))
     next_id+=1;survival.wave.register_spawn()
     return zombie
+func roll_type(number: int) -> String:
+    var weights: Dictionary={};var total: float=0
+    for kind: String in types:
+        var weight:=maxf(8 if kind=="walker" else 1,float(types[kind].weight)+mini(number-1,25)*float(types[kind].wave_weight))
+        weights[kind]=weight;total+=weight
+    var roll:=random.randf()*total
+    for kind: String in weights:
+        roll-=float(weights[kind])
+        if roll<=0:return kind
+    return "walker"
+func type_stats(number: int, kind: String) -> Dictionary:
+    var result:=stats(number);var definition: Dictionary=types[kind]
+    result.health*=float(definition.health)
+    result.damage=minf(60,float(result.damage)*float(definition.damage))
+    result.speed=minf(7.5,float(result.speed)*float(definition.speed))
+    result.kind=kind
+    return result
+func scream(source: CharacterBody3D) -> void:
+    if survival.over or not source.alive or source.archetype!="screamer":return
+    var radius: float=types.screamer.scream_radius
+    for zombie in pool:
+        if zombie.alive and zombie.global_position.distance_to(source.global_position)<radius:zombie.alerted=true
+    if scream_notice<=0:
+        scream_notice=3
+        survival.announce("SCREAMER ALERTED THE HORDE")
+        GameUI.play_ui("wave_start")
 func spawn_position() -> Vector2:
     var actor: CharacterBody3D=survival.game.get_active_actor()
     var center:=Vector2(actor.global_position.x,actor.global_position.z)

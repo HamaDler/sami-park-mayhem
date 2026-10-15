@@ -2,8 +2,10 @@ extends Control
 var survival: Node3D
 var ending: Control
 var summary: Label
+var workshop: Control
 func _ready() -> void:
     mouse_filter=Control.MOUSE_FILTER_IGNORE;process_mode=Node.PROCESS_MODE_ALWAYS
+    workshop=Control.new();workshop.set_script(load("res://scripts/workshop_menu.gd"));add_child(workshop)
     ending=Control.new();ending.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(ending)
     var shade:=ColorRect.new();shade.color=Color(.015,.02,.025,.92);shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);ending.add_child(shade)
     var frame:=Control.new();frame.set_anchors_and_offsets_preset(Control.PRESET_CENTER);frame.position=Vector2(-300,-190);frame.size=Vector2(600,410);ending.add_child(frame)
@@ -16,6 +18,7 @@ func _ready() -> void:
 func restart() -> void:
     get_tree().paused=false;get_tree().reload_current_scene()
 func show_game_over() -> void:
+    workshop.close()
     var s:=survival
     summary.text="WAVE %d    /    %d KILLS\nSCORE %d\nBEST SCORE %d    /    BEST WAVE %d\nLIFETIME KILLS %d" % [s.wave.number,s.kills,s.score,s.records.best_score,s.records.best_wave,s.records.lifetime_kills]
     ending.show();ending.get_child(1).get_child(2).grab_focus()
@@ -41,11 +44,36 @@ func _draw() -> void:
     draw_rect(Rect2(bottom+Vector2(4,4),Vector2(282*clampf(s.health/float(s.config.player.max_health),0,1),25)),GameUI.RED if s.health<35 else Color("76ba79"))
     _text(bottom+Vector2(13,24),"HEALTH  %d" % ceili(s.health),19,GameUI.WHITE,true)
     var y: float=225
+    if s.missions.active:
+        var mission: Node3D=s.missions
+        var origin:=Vector2(30,156)
+        draw_style_box(GameUI.style(Color(.02,.03,.04,.9)),Rect2(origin,Vector2(350,128)))
+        draw_line(origin,origin+Vector2(350,0),Color("64e2f0"),3,true)
+        _text(origin+Vector2(13,25),"SUPPLIES / "+mission.location_name,22,Color("64e2f0"),true)
+        _text(origin+Vector2(13,51),mission.status,17,GameUI.WHITE,true)
+        var distance: float=s.game.get_active_actor().global_position.distance_to(Vector3(mission.position_2d.x,0,mission.position_2d.y))
+        _text(origin+Vector2(13,76),"%dm   /   %ds LEFT" % [roundi(distance),ceili(mission.remaining)],19,GameUI.MUTED,true)
+        draw_rect(Rect2(origin+Vector2(13,91),Vector2(324,8)),Color("354039"))
+        draw_rect(Rect2(origin+Vector2(13,91),Vector2(324*clampf(mission.progress/float(mission.settings.hold_seconds),0,1),8)),Color("64e2f0"))
+        _text(origin+Vector2(13,119),"SECURE  %d / %ds" % [floori(mission.progress),ceili(mission.settings.hold_seconds)],17,GameUI.WHITE,true)
+        if not get_tree().paused:
+            var camera: Camera3D=s.game.camera_rig.camera
+            var world_point:=Vector3(mission.position_2d.x,3,mission.position_2d.y)
+            var marker:=camera.unproject_position(world_point)
+            if camera.is_position_behind(world_point):marker=size*.5-(marker-size*.5)
+            marker=marker.clamp(Vector2(35,310),size-Vector2(45,190))
+            draw_arc(marker,10,0,TAU,4,Color("64e2f0"),3,true)
+            var caption: String="SUPPLIES  %dm" % roundi(distance)
+            var width:=GameUI.bold().get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,17).x
+            var label_point:=marker+Vector2(15,5)
+            if label_point.x+width>size.x-20:label_point.x=marker.x-width-15
+            _text(label_point,caption,17,Color("64e2f0"),true)
     if s.rewards.infinite_ammo>0:_text(Vector2(size.x-338,y),"INFINITE AMMO  %ds" % ceili(s.rewards.infinite_ammo),23,GameUI.LIME,true);y+=32
     if s.rewards.double_dinars>0:_text(Vector2(size.x-338,y),"DOUBLE DINARS  %ds" % ceili(s.rewards.double_dinars),23,Color("ffd268"),true)
     if s.game.is_driving():
         var cart: CharacterBody3D=s.game.active_vehicle.vehicle
         _text(Vector2(size.x-287,size.y-323),"CART  %d%%" % ceili(cart.health/cart.max_health*100),23,GameUI.RED if cart.health<cart.max_health*.25 else GameUI.WHITE,true)
+        _text(Vector2(size.x-287,size.y-299),"BUMPER %d  /  ARMOR %d  /  GRIP %d" % [s.upgrades.levels.bumper,s.upgrades.levels.armor,s.upgrades.levels.handling],16,GameUI.LIME,true)
     if s.damage_flash>0:
         var c:=Color(.8,.03,.02,s.damage_flash*.8)
         draw_rect(Rect2(Vector2.ZERO,Vector2(size.x,12)),c);draw_rect(Rect2(Vector2.ZERO,Vector2(12,size.y)),c)

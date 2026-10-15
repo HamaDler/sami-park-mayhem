@@ -15,6 +15,7 @@ var selection: Dictionary = {}
 var rendering_suspended: bool = false
 var previous_disable_3d: bool = false
 var navigation_only: bool=false
+const SURVIVAL_LEGEND="BOX = WEAPONS / AMMO /\nREPAIRS / WORKSHOP\n\nCYAN = SUPPLY MISSION"
 func _ready() -> void:
     mouse_filter=Control.MOUSE_FILTER_STOP
     theme=GameUI.theme()
@@ -79,13 +80,13 @@ func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
     cart=vehicle;park=world;canvas.initialize(vehicle,world)
 func open() -> void:
     selection.clear();canvas.selected.clear()
-    destination_label.text="BOX = WEAPONS / AMMO / REPAIRS\n\nCLICK TO SET A WAYPOINT" if navigation_only else "NO WAYPOINT SELECTED";destination_label.modulate=GameUI.MUTED
+    destination_label.text=SURVIVAL_LEGEND+"\n\nCLICK TO SET A WAYPOINT" if navigation_only else "NO WAYPOINT SELECTED";destination_label.modulate=GameUI.MUTED
     spawn_button.disabled=true;canvas.panning=false;canvas.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
     show();canvas.queue_redraw()
 func select_point(point: Vector2, quick_spawn: bool=false) -> void:
     if navigation_only:
         selection={"valid":true,"position":point,"yaw":cart.rotation.y};canvas.selected=selection
-        destination_label.text="WAYPOINT\nE %d m  /  N %d m\n\nBOX = WEAPONS / AMMO / REPAIRS" % [point.x,-point.y]
+        destination_label.text="WAYPOINT\nE %d m  /  N %d m\n\n" % [point.x,-point.y]+SURVIVAL_LEGEND
         canvas.queue_redraw();return
     selection=park.resolve_map_spawn(point,cart.rotation.y,cart.get_rid(),cart.is_in_group("walk_player"))
     canvas.selected=selection;canvas.requested_point=point;spawn_button.disabled=not selection.valid
@@ -107,7 +108,8 @@ func _input(event: InputEvent) -> void:
         spawn_selected();get_viewport().set_input_as_handled()
 func configure_navigation_only() -> void:
     spawn_button.hide()
+    destination_label.size.y=190
     var labels: Array[Node]=side_body.find_children("*","Label",false,false)
     for label: Label in labels:
         if label.text.contains("QUICK SPAWN"):label.text="SURVIVAL / NO FAST TRAVEL"
-    destination_label.text="BOX = WEAPONS / AMMO / REPAIRS"
+    destination_label.text=SURVIVAL_LEGEND

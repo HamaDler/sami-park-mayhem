@@ -1,0 +1,4 @@
+{
+  "initial_delay":45.0,"cooldown":90.0,"travel_seconds":210.0,"hold_seconds":30.0,"radius":14.0,"contest_radius":5.0,"minimum_distance":120.0,"maximum_distance":1100.0,"score":500,"dinars":1500,"upgrade_chance":0.25,
+  "locations":[{"name":"WESTERN LOOP","anchor":[-329,85]},{"name":"CENTRAL PLAZA","anchor":[104,-40]},{"name":"LAKESIDE","anchor":[343,-146]},{"name":"FAIRGROUNDS","anchor":[-36,334]}]
+}
