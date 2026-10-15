@@ -14,6 +14,7 @@ var zoom_controls: Control
 var selection: Dictionary = {}
 var rendering_suspended: bool = false
 var previous_disable_3d: bool = false
+var navigation_only: bool=false
 func _ready() -> void:
     mouse_filter=Control.MOUSE_FILTER_STOP
     theme=GameUI.theme()
@@ -78,10 +79,14 @@ func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
     cart=vehicle;park=world;canvas.initialize(vehicle,world)
 func open() -> void:
     selection.clear();canvas.selected.clear()
-    destination_label.text="NO WAYPOINT SELECTED";destination_label.modulate=GameUI.MUTED
+    destination_label.text="BOX = WEAPONS / AMMO / REPAIRS\n\nCLICK TO SET A WAYPOINT" if navigation_only else "NO WAYPOINT SELECTED";destination_label.modulate=GameUI.MUTED
     spawn_button.disabled=true;canvas.panning=false;canvas.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
     show();canvas.queue_redraw()
 func select_point(point: Vector2, quick_spawn: bool=false) -> void:
+    if navigation_only:
+        selection={"valid":true,"position":point,"yaw":cart.rotation.y};canvas.selected=selection
+        destination_label.text="WAYPOINT\nE %d m  /  N %d m\n\nBOX = WEAPONS / AMMO / REPAIRS" % [point.x,-point.y]
+        canvas.queue_redraw();return
     selection=park.resolve_map_spawn(point,cart.rotation.y,cart.get_rid(),cart.is_in_group("walk_player"))
     canvas.selected=selection;canvas.requested_point=point;spawn_button.disabled=not selection.valid
     destination_label.modulate=GameUI.LIME if selection.valid else GameUI.RED
@@ -93,9 +98,16 @@ func select_point(point: Vector2, quick_spawn: bool=false) -> void:
     canvas.queue_redraw()
     if quick_spawn:spawn_selected()
 func spawn_selected() -> void:
+    if navigation_only:return
     if selection.get("valid",false):spawn_requested.emit(selection.position,selection.yaw)
 func _process(_delta: float) -> void:
     if visible:zoom_label.text="ZOOM  %.1fx" % canvas.zoom
 func _input(event: InputEvent) -> void:
     if visible and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode==KEY_ENTER:
         spawn_selected();get_viewport().set_input_as_handled()
+func configure_navigation_only() -> void:
+    spawn_button.hide()
+    var labels: Array[Node]=side_body.find_children("*","Label",false,false)
+    for label: Label in labels:
+        if label.text.contains("QUICK SPAWN"):label.text="SURVIVAL / NO FAST TRAVEL"
+    destination_label.text="BOX = WEAPONS / AMMO / REPAIRS"

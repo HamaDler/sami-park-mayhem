@@ -7,6 +7,7 @@ var lakes: Array[PackedVector2Array] = []
 var sports: Array[PackedVector2Array] = []
 var bounds: Rect2
 var elapsed: float = 0
+var survival: Node3D
 func project(point: Vector2) -> Vector2:
     var scale_factor:=minf((size.x-28)/bounds.size.x,(size.y-64)/bounds.size.y)
     return Vector2(size.x*.5,(size.y+24)*.5)+(point-bounds.get_center())*scale_factor
@@ -38,6 +39,12 @@ func _draw() -> void:
     draw_polyline(mapped(park.running_track.centerline),Color("d47760"),1.4,true)
     for lake in lakes:draw_colored_polygon(mapped(lake),Color("477f95"))
     for court in sports:draw_colored_polygon(mapped(court),Color("9bb6c9"))
+    if survival:
+        for station in survival.stations:
+            var marker:=project(Vector2(station.global_position.x,station.global_position.z))
+            draw_rect(Rect2(marker-Vector2(3,3),Vector2(6,6)),Color("ffd268"))
+        if survival.wave.running and survival.wave.spawned>=survival.wave.total and survival.wave.remaining()<=5:
+            for zombie in survival.enemies.living():draw_circle(project(Vector2(zombie.global_position.x,zombie.global_position.z)),3,GameUI.RED)
     if cart.is_in_group("walk_player"):
         for access: Node3D in get_tree().get_nodes_in_group("vehicles"):
             var vehicle_point:=project(Vector2(access.vehicle.global_position.x,access.vehicle.global_position.z))

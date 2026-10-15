@@ -18,7 +18,10 @@ func run() -> void:
     var player: CharacterBody3D=game.player
     var camera: Node3D=game.camera_rig
     var access: Node3D=cart.get_node("VehicleAccess")
+    game.survival.process_mode=Node.PROCESS_MODE_DISABLED
+    player.weapons.grant_weapon(3,0)
     cart.teleport_to(Vector2(445,-76.47),0)
+    game.enter_vehicle(access,true)
     await frames(8)
     camera.zoom_by(1000)
     check(is_equal_approx(camera.zoom_distance,2.8),"Driving camera still clamps to 2.8 metres")
@@ -67,7 +70,7 @@ func run() -> void:
     var second: CharacterBody3D=load("res://scenes/cart.tscn").instantiate();second.name="AnotherVehicle";game.add_child(second);second.initialize(game.park)
     second.teleport_to(Vector2(445,-66),0);player.teleport_to(Vector2(447,-66),0);await frames(6)
     check(game.enter_vehicle(second.get_node("VehicleAccess")),"The same interaction component supports a second vehicle")
-    second.global_position+=Vector3(7,0,0);game.recover_active();await frames(1)
+    second.global_position+=Vector3(7,0,0);second.recover();await frames(1)
     check(second.global_position.distance_to(Vector3(445,.05,-66))<.3 and camera.global_position.distance_to(second.global_position+Vector3.UP*camera.settings.follow_height)<.1,"Recovering a second vehicle snaps the active camera to it")
     print("PLAYER_SAFETY_RESULT: ",checks," checks, ",failures.size()," failures")
     quit(0 if failures.is_empty() else 1)

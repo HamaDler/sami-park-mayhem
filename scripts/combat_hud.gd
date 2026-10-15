@@ -29,17 +29,21 @@ func _draw() -> void:
     var dimensions:=Vector2(332,134)
     draw_colored_polygon(PackedVector2Array([point,point+Vector2(320,0),point+Vector2(332,12),point+dimensions,point+Vector2(12,134),point+Vector2(0,122)]),Color(.025,.04,.065,.9))
     draw_line(point,point+Vector2(320,0),GameUI.LIME,3,true)
-    draw_string(GameUI.bold(),point+Vector2(15,32),str(weapons.current().name),HORIZONTAL_ALIGNMENT_LEFT,-1,23,GameUI.WHITE)
+    var title: String=str(weapons.current().name)
+    if weapons.survival_enabled:title+="  /  T"+str(int(weapons.tiers[weapons.selected_slot])+1)
+    draw_string(GameUI.bold(),point+Vector2(15,32),title,HORIZONTAL_ALIGNMENT_LEFT,-1,23,GameUI.WHITE)
     var ammo:=str(weapons.rounds[weapons.selected_slot])
+    if weapons.infinite_ammo:ammo="∞"
     draw_string(GameUI.bold(),point+Vector2(17,87),ammo,HORIZONTAL_ALIGNMENT_LEFT,-1,51,GameUI.WHITE)
-    draw_string(GameUI.regular(),point+Vector2(85,82),"/ "+str(int(weapons.current().magazine)),HORIZONTAL_ALIGNMENT_LEFT,-1,24,GameUI.MUTED)
+    draw_string(GameUI.regular(),point+Vector2(85,82),"/ "+str(int(weapons.reserve[weapons.selected_slot]) if weapons.survival_enabled else int(weapons.current().magazine)),HORIZONTAL_ALIGNMENT_LEFT,-1,24,GameUI.MUTED)
     draw_string(GameUI.regular(),point+Vector2(177,63),"R  RELOAD",HORIZONTAL_ALIGNMENT_LEFT,-1,16,GameUI.MUTED)
     draw_string(GameUI.regular(),point+Vector2(177,84),"RMB AIM / LMB FIRE",HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.MUTED)
     for slot in range(1,4):
         var x:=point.x+14+(slot-1)*103
         var selected: bool=weapons.selected_slot==slot
         draw_rect(Rect2(Vector2(x,point.y+102),Vector2(98,22)),GameUI.LIME if selected else GameUI.PANEL)
-        draw_string(GameUI.bold(),Vector2(x+7,point.y+118),str(slot)+" "+["PISTOL","RIFLE","SNIPER"][slot-1],HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.INK if selected else GameUI.WHITE)
+        var caption: String=["PISTOL","RIFLE","SNIPER"][slot-1] if weapons.unlocked[slot] else "LOCKED"
+        draw_string(GameUI.bold(),Vector2(x+7,point.y+118),str(slot)+" "+caption,HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.INK if selected else (GameUI.WHITE if weapons.unlocked[slot] else GameUI.MUTED))
     if weapons.reload_time>0:
         var ratio: float=1-weapons.reload_time/float(weapons.current().reload_seconds)
         draw_rect(Rect2(point+Vector2(15,93),Vector2(302*ratio,3)),GameUI.LIME)

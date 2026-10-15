@@ -1,0 +1,288 @@
+{
+  "pistol_shot.wav": {
+    "pack": "firearms",
+    "source_file": "A_42P.wav",
+    "source_sha256": "8e84438e771c157155a6a1ff47a6a7a7d81b6f39b185d41e426c57337a82254a",
+    "sha256": "00cde1e79402ed825f601385513a9aaf16d994eb49190b3095da8fdf03e94629",
+    "duration": 1.8,
+    "peak": 0.699999988079071,
+    "rms": 0.02222609519958496,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "rifle_shot.wav": {
+    "pack": "firearms",
+    "source_file": "D_32P.wav",
+    "source_sha256": "acee9d2106b68fe5956225a19d7aedf943d97793817f9bda9d486a2b74b0a812",
+    "sha256": "255418aa632c54e546f04a4f13c56b18e7b6ded4f4679cdf490bdedb86c3bd75",
+    "duration": 1.2,
+    "peak": 0.699999988079071,
+    "rms": 0.023599712178111076,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "sniper_shot.wav": {
+    "pack": "firearms",
+    "source_file": "M_26P.wav",
+    "source_sha256": "51261c62c8c1dce64cd700e948dda4794473797753457621b480eff54ba30445",
+    "sha256": "a6baf854dc185b4ef77faf7275c604bc792a610419fda60f6222e6d121ff3416",
+    "duration": 3.0,
+    "peak": 0.699999988079071,
+    "rms": 0.022150151431560516,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "engine_loop.wav": {
+    "pack": "engine",
+    "source_file": "engine.wav",
+    "source_sha256": "69d74b106509037ce547429e4c3f9ae906b0fffe88d0bb8b3b5a8b0cfc239048",
+    "sha256": "c1a14bde02c5c3cae47e28192b3f0596400fabba08649bb18f28c6c8d06972d0",
+    "duration": 0.829092970521542,
+    "peak": 0.699999988079071,
+    "rms": 0.38375386595726013,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; seam crossfade; "
+  },
+  "rolling_loop.wav": {
+    "pack": "engine",
+    "source_file": "engine_high.wav",
+    "source_sha256": "e26bef6f1804670aba02b6b9a8c5485cf05a6a1e902a5a50c098230ace49967f",
+    "sha256": "37b4bbb7bd253e454f13b5363a92208c00f0a5d89207bfc1bd79f76b51907ed6",
+    "duration": 0.6475736961451247,
+    "peak": 0.699999988079071,
+    "rms": 0.3873017430305481,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; seam crossfade; lowpass 550Hz; "
+  },
+  "tire_skid_loop.wav": {
+    "pack": "skid",
+    "source_file": "skid.wav",
+    "source_sha256": "2b341cfa20987388fcca9fd91d8be5056cb6c6c54abc2a97846c2be5e5a4f604",
+    "sha256": "fe2288554d41c26a11218522f7c32bee266cc694941681ae220420d368500b28",
+    "duration": 2.965011337868481,
+    "peak": 0.699999988079071,
+    "rms": 0.18272310495376587,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; seam crossfade; "
+  },
+  "driving_wind_loop.wav": {
+    "pack": "wind",
+    "source_file": "wind.wav",
+    "source_sha256": "a2856f794fbf77e05f8241dc4adeade7f62fa21c3c9dc49f7725b6c6218060c3",
+    "sha256": "a9f8c783c706f835f5801c5f39b02e2d3e77d757576168618b903dabddafcf9e",
+    "duration": 7.96501133786848,
+    "peak": 0.699999988079071,
+    "rms": 0.11978963017463684,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; seam crossfade; lowpass 2200Hz; "
+  },
+  "ui_hover.wav": {
+    "pack": "ui",
+    "source_file": "select_006.ogg",
+    "source_sha256": "b44550fa8d3276c072ce7c3c1315d949f7a28a95bc22b3618ad4eea62eac8abe",
+    "sha256": "d8ea07440387a212e7cb492525e98f968d301d101af04ddd36a530c6f03712f0",
+    "duration": 0.09,
+    "peak": 0.7000000476837158,
+    "rms": 0.2637222409248352,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "ui_click.wav": {
+    "pack": "ui",
+    "source_file": "click_003.ogg",
+    "source_sha256": "2fa929138bc3a0f432696588f66eac94b8f6d463905ec8808c6461ce4b054292",
+    "sha256": "47576af1d07977d762cc8b5a3c9f411f864637ebb47a06c96f984ba94e6aa4f8",
+    "duration": 0.007120181405895692,
+    "peak": 0.699999988079071,
+    "rms": 0.205679252743721,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "ui_open.wav": {
+    "pack": "ui",
+    "source_file": "open_002.ogg",
+    "source_sha256": "24ff224fe2c09c6aed1b41249825382dc74cf324b887ff279d8494912ce2beee",
+    "sha256": "0c396c831f81ec22f9673bb2de38956847b114d89e4a1d87f1bdca136c64a3f7",
+    "duration": 0.3087755102040816,
+    "peak": 0.699999988079071,
+    "rms": 0.17860189080238342,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "ui_close.wav": {
+    "pack": "ui",
+    "source_file": "close_002.ogg",
+    "source_sha256": "bc4279d2bb2bf86592473eab6a8eab55e51b54a8619315000dbd780a83b102d8",
+    "sha256": "db2238efd3e63f9148251398a4a44abfcaf6a880fad087e6b7d8ecec93d60c60",
+    "duration": 0.31378684807256235,
+    "peak": 0.7000000476837158,
+    "rms": 0.13163766264915466,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "ui_error.wav": {
+    "pack": "ui",
+    "source_file": "error_004.ogg",
+    "source_sha256": "0b574cea597d96507e782ae9764f88482ce49f46e931e57054bf7150047f2d69",
+    "sha256": "fc0f2481799104f532d0172fa233c97fbee63087d2a9b2c2c438f9589d868500",
+    "duration": 0.10448979591836735,
+    "peak": 0.7000000476837158,
+    "rms": 0.13885359466075897,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "ui_confirm.wav": {
+    "pack": "ui",
+    "source_file": "confirmation_002.ogg",
+    "source_sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+    "sha256": "7791a44465b144f17b78762324d4c4a487b6644846651b41ea8315048d0ac607",
+    "duration": 0.5390022675736962,
+    "peak": 0.699999988079071,
+    "rms": 0.14195773005485535,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "weapon_equip.wav": {
+    "pack": "ui",
+    "source_file": "switch_003.ogg",
+    "source_sha256": "ca12dd32103f401481d5aff56d5e9831174e99bb577139c09b07d046eb8b837e",
+    "sha256": "6c7c9c90c0909b8d9496df53ef5ed09847d74e9732f86f61d8fc6723af7c0081",
+    "duration": 0.5,
+    "peak": 0.699999988079071,
+    "rms": 0.13339556753635406,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "reload_pistol.wav": {
+    "pack": "ui",
+    "source_file": "switch_005.ogg",
+    "source_sha256": "e94dfab6fd6558068ab3ea97e22e4b4f16b83ee440e6abf33ec4c4e9fbe8a70e",
+    "sha256": "66dfa1c411473ba533a0ad03e82c984a24727a8dc1b00db5d2639ab93c5cdec8",
+    "duration": 0.6090249433106576,
+    "peak": 0.699999988079071,
+    "rms": 0.06438515335321426,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "reload_rifle.wav": {
+    "pack": "ui",
+    "source_file": "switch_006.ogg",
+    "source_sha256": "2676ddc4e341ee557b4d1dc8767ef8655540d66fb3ded6a1614080dbc4dc6f18",
+    "sha256": "9c8e28d983620d56a4ae3d1e6c72fa6d687ecd643e0388a02393424beeead1ff",
+    "duration": 0.6076417233560091,
+    "peak": 0.699999988079071,
+    "rms": 0.0419280044734478,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "reload_sniper.wav": {
+    "pack": "ui",
+    "source_file": "switch_007.ogg",
+    "source_sha256": "eeaf60c2abc7e1b715e2b032401bcbf6b3753b77f96b238f861a034a75515967",
+    "sha256": "e57d292f3a73d588bd2ccc0b3b3fb08870dea647ccafc2f7d0ca06ee8e172cf7",
+    "duration": 0.6114512471655329,
+    "peak": 0.699999988079071,
+    "rms": 0.03819556161761284,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "dry_fire.wav": {
+    "pack": "ui",
+    "source_file": "tick_004.ogg",
+    "source_sha256": "0253d5f7d8d2afbbc370eac2a4539bb844239f0c98343e516d376b137c06d27c",
+    "sha256": "9c1cc664d143c52676c33b54fdc9ace61624f71d5d8d9e23d1be8574bf2f3166",
+    "duration": 0.04630385487528345,
+    "peak": 0.699999988079071,
+    "rms": 0.14984498918056488,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "wave_start.wav": {
+    "pack": "ui",
+    "source_file": "maximize_006.ogg",
+    "source_sha256": "f050b3bb77cb0b901bc8df43d2cc1872c353aebae10b4030cf8ae681726ad343",
+    "sha256": "79c0c2924161feb5c1a28d39838b163b5274db89b710092cd2eb90ba6c770fa1",
+    "duration": 0.3799546485260771,
+    "peak": 0.7000000476837158,
+    "rms": 0.15178845822811127,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "wave_clear.wav": {
+    "pack": "ui",
+    "source_file": "confirmation_004.ogg",
+    "source_sha256": "568967a3d9f8a8f6af54ea01729c4882284308f2a27d78c07ffd7ee0d6951661",
+    "sha256": "7bf168ec2733ed41527fc1ad3e59de3c108df90bad8c9f5bf7cc7ed300666275",
+    "duration": 0.4904081632653061,
+    "peak": 0.699999988079071,
+    "rms": 0.20040050148963928,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "step_grass_0.wav": {
+    "pack": "impact",
+    "source_file": "footstep_grass_000.ogg",
+    "source_sha256": "9d49497777405d78d7cf7f2888e28277f3a23192300cfd1d79d54876b20f479f",
+    "sha256": "fa61a5a323b6ede5f0dd0c5dad5086b82cd48275040d11d91a3bfe807ab32249",
+    "duration": 0.7746712018140589,
+    "peak": 0.7000000476837158,
+    "rms": 0.02506929263472557,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "step_path_0.wav": {
+    "pack": "impact",
+    "source_file": "footstep_concrete_000.ogg",
+    "source_sha256": "d7267e183067757c92c169de2a379abea592cfca6b39bb2e8feea15221ad79fe",
+    "sha256": "aa954bcc7ee7eb9e7d9d74a947cb142927821d49679da0a49f68d67aed808a38",
+    "duration": 0.10301587301587302,
+    "peak": 0.699999988079071,
+    "rms": 0.06636525690555573,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "step_grass_1.wav": {
+    "pack": "impact",
+    "source_file": "footstep_grass_001.ogg",
+    "source_sha256": "fb28781bd22b2eefdc14077f1adf5c94d7fe9c3a130194633b55f3e0d39d9f04",
+    "sha256": "2f07c96d53df41af385476240ba6fb2c23036d0c18ff6e7d4031d0b4f90643e5",
+    "duration": 0.670702947845805,
+    "peak": 0.7000000476837158,
+    "rms": 0.03153024613857269,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "step_path_1.wav": {
+    "pack": "impact",
+    "source_file": "footstep_concrete_001.ogg",
+    "source_sha256": "507a75eb19b897087855a3be3cf11a12d7fa37d143ad535eeebe0b8031c7325d",
+    "sha256": "8f60746d5a194174edf4ed9f05ff84d8482a2bf20aec16d0cc28e7ff14428771",
+    "duration": 0.10473922902494331,
+    "peak": 0.699999988079071,
+    "rms": 0.061258427798748016,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "step_grass_2.wav": {
+    "pack": "impact",
+    "source_file": "footstep_grass_002.ogg",
+    "source_sha256": "73a520139f5be716a403bfe9c80e0e94d1e61d8e9de04a354b336392164b53dc",
+    "sha256": "38bf47f85144ee931c75462c54e13d6b70666f83e2640b8af2640cd563f267e1",
+    "duration": 0.689546485260771,
+    "peak": 0.7000000476837158,
+    "rms": 0.025942973792552948,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "step_path_2.wav": {
+    "pack": "impact",
+    "source_file": "footstep_concrete_002.ogg",
+    "source_sha256": "b21fa546d74941196b25da8a20b7010abd8c05c4fcf93545d1f344e66a664e13",
+    "sha256": "cc4e7303e3d68e16146441b9384a3caa853d7858e314382c98f95dbe7c46246f",
+    "duration": 0.10988662131519275,
+    "peak": 0.7000000476837158,
+    "rms": 0.05419224873185158,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "cart_impact.wav": {
+    "pack": "impact",
+    "source_file": "impactMetal_heavy_000.ogg",
+    "source_sha256": "e07045693e4a2b3d165c424e3dab4c781d9ff8880a386880ac89a51315d7f831",
+    "sha256": "425068d87b86c024c3d353a91bca39ab3ab3b58bcbd2450798e42d3528c00f42",
+    "duration": 0.16476190476190475,
+    "peak": 0.699999988079071,
+    "rms": 0.06972917914390564,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "player_hit.wav": {
+    "pack": "impact",
+    "source_file": "impactSoft_heavy_000.ogg",
+    "source_sha256": "49e7ca88743fca974bb8676ea138b751cfd8f9033b5e7af8736c2a215d6edbc1",
+    "sha256": "ddd6c9b04351d607dbdcca926cf39eb8376065ac737b745a135e229f64d5c739",
+    "duration": 0.5268027210884354,
+    "peak": 0.699999988079071,
+    "rms": 0.10445471107959747,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "empty_city.ogg": {
+    "pack": "music",
+    "source_file": "EmptyCity.ogg",
+    "sha256": "10cdeb8e7ede29f8afeedaec23f16297752a89aac36c37b06a0262b5190efaad",
+    "processing": "Original loopable Ogg retained unchanged."
+  }
+}

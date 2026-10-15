@@ -1,0 +1,11 @@
+{
+  "waves": {"first_total": 100, "total_increment": 25, "first_active": 40, "active_increment": 4, "max_active": 80, "spawn_interval": 0.35, "initial_delay": 8.0, "preparation_seconds": 15.0},
+  "zombies": {"health": 100.0, "health_growth": 1.12, "damage": 25.0, "damage_increment": 2.0, "damage_cap": 60.0, "speed": 1.8, "speed_increment": 0.15, "speed_cap": 5.5, "sight_distance": 45.0, "hearing_distance": 110.0, "attack_distance": 1.65, "attack_interval": 1.2, "attack_windup": 0.4, "corpse_seconds": 5.0, "max_corpses": 10, "relocate_distance": 230.0, "spawn_min_foot": 32.0, "spawn_max_foot": 90.0, "spawn_min_cart": 75.0, "spawn_max_cart": 170.0},
+  "player": {"max_health": 100.0, "regeneration_delay": 5.0, "regeneration_per_second": 12.0},
+  "economy": {"starting_dinars": 500, "kill_score": 100, "headshot_score": 150, "roadkill_score": 50, "kill_dinars": 100, "headshot_dinars": 150, "roadkill_dinars": 50, "box_price": 950, "ammo_price": 250, "repair_price": 750, "box_reveal_seconds": 3.0, "reward_seconds": 20.0, "repair_seconds": 3.0, "recovery_seconds": 3.0},
+  "powerups": {"drop_chance": 0.08, "pickup_lifetime": 30.0, "infinite_ammo_seconds": 20.0, "double_dinars_seconds": 30.0},
+  "weapons": {"damage_tiers": [1.0, 1.5, 2.25, 3.4], "reserve_ammo": [96, 180, 30], "base_tier_weights": [65.0, 25.0, 9.0, 1.0], "headshot_multiplier": 2.0},
+  "cart": {"max_health": 1000.0, "ram_wear": 20.0, "ram_min_speed": 3.0, "ram_damage_per_metre_second": 30.0, "crash_damage_per_metre_second": 8.0},
+  "navigation": {"cell_size": 3.0, "agent_radius": 0.42, "think_interval": 0.2, "repath_interval": 1.5},
+  "models": ["res://assets/zombies/quaternius/Zombie_Basic.gltf", "res://assets/zombies/quaternius/Zombie_Chubby.gltf", "res://assets/zombies/quaternius/Zombie_Arm.gltf"]
+}

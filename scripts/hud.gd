@@ -26,6 +26,7 @@ var elapsed: float = 0
 var tutorial_time: float = 0
 var area_time: float = 0
 var landmarks: Array = []
+var survival_overlay: Control
 func _ready() -> void:
     root=Control.new();root.name="DrivingHUD"
     root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -83,7 +84,7 @@ func _ready() -> void:
     pause_overlay.recover_requested.connect(func():get_parent().recover_active();set_paused(false))
     pause_overlay.map_requested.connect(open_map)
     pause_overlay.density_requested.connect(_set_density)
-    pause_overlay.quit_requested.connect(func():get_tree().quit())
+    pause_overlay.quit_requested.connect(GameUI.quit_game)
     pause_overlay.hide()
     full_map=load("res://scenes/full_map.tscn").instantiate();root.add_child(full_map)
     full_map.close_requested.connect(close_map);full_map.spawn_requested.connect(_map_spawn)
@@ -99,6 +100,8 @@ func show_toast(message: String) -> void:
     toast_time=3.5
     toast_plate.show()
 func set_paused(value: bool) -> void:
+    if get_parent().get("survival") and get_parent().survival.over:return
+    if value!=get_tree().paused:GameUI.play_ui("ui_open" if value else "ui_close")
     get_tree().paused=value
     if not value and is_instance_valid(full_map):full_map.hide()
     var show_menu:=value and (not is_instance_valid(full_map) or not full_map.visible)
@@ -109,6 +112,7 @@ func set_paused(value: bool) -> void:
     _suppress_fire()
 func open_map() -> void:
     if full_map.visible:return
+    GameUI.play_ui("ui_open")
     map_was_paused=get_tree().paused
     get_tree().paused=true;pause_overlay.hide()
     Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
@@ -116,12 +120,15 @@ func open_map() -> void:
     _suppress_fire()
     full_map.open()
 func close_map() -> void:
+    GameUI.play_ui("ui_close")
     full_map.hide();get_tree().paused=map_was_paused;pause_overlay.visible=map_was_paused
     if map_was_paused:pause_overlay.open(park.vegetation_density)
     _restore_mouse();_suppress_fire()
 func _map_spawn(point: Vector2, yaw: float) -> void:
+    if get_parent().get("survival"):return
     get_parent().teleport_active(point,yaw);map_was_paused=false;close_map()
 func _unhandled_input(event: InputEvent) -> void:
+    if get_parent().get("survival") and get_parent().survival.over:return
     if event is InputEventKey and event.echo:return
     if event.is_action_pressed("map_toggle"):
         if full_map.visible:close_map()
@@ -134,7 +141,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
     if cart==null:return
     status_label.text="DRIFT" if cart.drifting else ("REVERSE" if cart.speed<-.1 else ("" if cart.on_path else "OFF ROAD"))
-    if cart.rolling:status_label.text="R  /  RESET CART"
+    if cart.rolling:status_label.text="F EXIT / HOLD R OUTSIDE" if get_parent().get("survival") else "R  /  RESET CART"
     status_label.modulate=GameUI.RED if cart.rolling else (Color("ffbc55") if cart.drifting else GameUI.LIME)
     trip_label.text="%.2f KM EXPLORED" % ((cart.distance_m+get_parent().get_node("WalkPlayer").distance_m)/1000.0)
     interaction_label.text=get_parent().interaction_text()
@@ -168,7 +175,8 @@ func set_context(person: CharacterBody3D, in_vehicle: bool) -> void:
     if driving:cart=person;gauge.initialize(person)
     gauge.visible=driving;driving_hints.visible=driving;foot_hints.visible=not driving
     mode_label.text="FREE DRIVE" if driving else "ON FOOT"
-    footer_reset_label.text="RESET" if driving else "RELOAD"
+    if get_parent().get("survival"):mode_label.text="SURVIVAL"
+    footer_reset_label.text="RECOVER" if driving else "RELOAD"
     map.cart=actor;full_map.cart=actor;full_map.canvas.cart=actor
     combat_hud.player=get_parent().get_node("WalkPlayer");combat_hud.game=get_parent();combat_hud.visible=not driving
     pause_overlay.set_context(driving)
@@ -179,3 +187,14 @@ func _restore_mouse() -> void:
 func _suppress_fire() -> void:
     var player: Node=get_parent().get_node_or_null("WalkPlayer")
     if player and is_instance_valid(player.weapons):player.weapons.suppress_until_release=true
+func initialize_survival(session: Node3D) -> void:
+    mode_label.text="SURVIVAL"
+    full_map.navigation_only=true
+    full_map.configure_navigation_only()
+    map.survival=session;full_map.canvas.survival=session
+    survival_overlay=Control.new();survival_overlay.set_script(load("res://scripts/survival_hud.gd"));root.add_child(survival_overlay)
+    survival_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);survival_overlay.survival=session
+    root.move_child(survival_overlay,pause_overlay.get_index())
+    pause_overlay.recover_button.text="RESTART RUN"
+func show_game_over() -> void:
+    full_map.hide();pause_overlay.hide();survival_overlay.show_game_over()

@@ -1,0 +1,14 @@
+{
+  "origin": [
+    -864.0,
+    -924.0
+  ],
+  "size": [
+    577,
+    617
+  ],
+  "cell_size": 3.0,
+  "bytes": 356009,
+  "blocked": 150562,
+  "source": "park_layout.json + vegetation_layout.json + sports_layout.json; static furniture added at runtime"
+}

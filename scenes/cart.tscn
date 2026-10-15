@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 [ext_resource type="Script" path="res://scripts/cart.gd" id="1"]
 [ext_resource type="Resource" path="res://data/driving_settings.tres" id="2"]
 [ext_resource type="PackedScene" path="res://assets/vehicles/club90/scene.gltf" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/tire_effects.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/vehicle_access.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/vehicle_audio.tscn" id="6"]
 [sub_resource type="BoxShape3D" id="Body"]
 size=Vector3(1.3,1.86,2.6)
 [node name="GolfCart" type="CharacterBody3D"]
@@ -19,5 +20,6 @@ shape=SubResource("Body")
 [node name="Club90" parent="Visual" instance=ExtResource("3")]
 rotation=Vector3(0,1.57079632679,0)
 [node name="TireEffects" parent="." instance=ExtResource("4")]
+[node name="VehicleAudio" parent="." instance=ExtResource("6")]
 
 [node name="VehicleAccess" parent="." instance=ExtResource("5")]

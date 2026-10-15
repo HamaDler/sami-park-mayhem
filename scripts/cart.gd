@@ -1,6 +1,11 @@
 extends CharacterBody3D
 signal recovered(reason: String)
 signal rollover_started
+signal destroyed
+var health: float=1000
+var max_health: float=1000
+var survival: Node3D
+var impact_speed: float=0
 var control_enabled: bool=false
 var rolling: bool = false
 var rollover_risk: float = 0
@@ -50,7 +55,8 @@ func initialize(world: Node3D) -> void:
 
 func _physics_process(delta: float) -> void:
     if park == null:return
-    if control_enabled and Input.is_action_just_pressed("recover"):recover("Back on the path")
+    impact_speed=0
+    if not survival and control_enabled and Input.is_action_just_pressed("recover"):recover("Back on the path")
     if rolling:
         _update_rollover(delta)
         return
@@ -69,7 +75,11 @@ func _physics_process(delta: float) -> void:
     if not is_on_floor():velocity.y-=20.0*delta
     else:velocity.y=-0.5
     var before := global_position
+    var incoming_velocity:=velocity
     move_and_slide()
+    for index in get_slide_collision_count():
+        var contact:=get_slide_collision(index)
+        if absf(contact.get_normal().y)<.7:impact_speed=maxf(impact_speed,-incoming_velocity.dot(contact.get_normal()))
     distance_m+=Vector2(global_position.x-before.x,global_position.z-before.z).length()
     if is_on_wall():
         var planar := Vector3(velocity.x,0,velocity.z)
@@ -164,8 +174,13 @@ func _drive(delta: float, throttle: float, steering_input: float, handbrake: boo
 
 func recover(reason: String = "Back on the path") -> void:
     last_recovery_position=global_position
+    var point:=Vector2(global_position.x,global_position.z)
+    var current_yaw:=rotation.y
+    if survival:point=survival.safe_point(point,self)
     _stop_rollover()
-    global_transform = safe_transform
+    if survival:
+        global_position=Vector3(point.x,.15,point.y);rotation=Vector3(0,current_yaw,0)
+    else:global_transform = safe_transform
     global_position.y = 0.15
     velocity = Vector3.ZERO
     speed = 0
@@ -286,8 +301,20 @@ func _stop_rollover() -> void:
     upright_time=0
 
 func set_control_enabled(value: bool) -> void:
-    control_enabled=value
+    control_enabled=value and health>0
     if not value:
         speed=0;velocity=Vector3.ZERO;steer=0;visual.rotation.z=0;_reset_handling()
     var driver: Node3D=visual.get_node("SeatedDriver")
     driver.visible=value;driver.set_process(value)
+func receive_damage(amount: float) -> void:
+    if health<=0 or amount<=0:return
+    health=maxf(0,health-amount)
+    if survival:survival.recovery_time=0
+    if health==0:
+        set_control_enabled(false);destroyed.emit()
+func right_in_place() -> void:
+    var p:=global_position
+    var forward: Vector3=-global_basis.z
+    var yaw:=atan2(-forward.x,-forward.z)
+    _stop_rollover();global_position=Vector3(p.x,.15,p.z);rotation=Vector3(0,yaw,0)
+    velocity=Vector3.ZERO;speed=0;steer=0;visual.rotation.z=0;_reset_handling();reset_physics_interpolation()

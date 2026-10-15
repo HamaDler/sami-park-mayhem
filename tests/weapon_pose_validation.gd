@@ -13,7 +13,9 @@ func run() -> void:
     game=load("res://scenes/main.tscn").instantiate();root.add_child(game);current_scene=game
     for connection in root.focus_exited.get_connections():root.focus_exited.disconnect(connection.callable)
     await frames(6)
-    check(game.exit_vehicle(),"Character can exit before testing weapon poses")
+    game.survival.process_mode=Node.PROCESS_MODE_DISABLED
+    check(game.player.active and not game.is_driving(),"Survival character is on foot before testing weapon poses")
+    game.player.weapons.grant_weapon(2,0);game.player.weapons.grant_weapon(3,0)
     var player: CharacterBody3D=game.player
     var avatar: Node3D=player.avatar
     var weapons: Node3D=player.weapons

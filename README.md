@@ -1,8 +1,28 @@
-# Sami Park — Golf Cart Explorer
+# Sami Park — Zombie Survival
 
 Open `project.godot` in **Godot 4.7.1** and press **F6** in `scenes/main.tscn`, or **F5** from any scene. Uses the Compatibility renderer. No plugins, paid assets, account, or network connection is required to play.
 
+## Survival
+
+Start on foot at English Door with a pistol (12 loaded / 96 reserve), 100 health, 500 dinars and the golf cart parked beside you. Wave 1 begins after eight seconds: 100 zombies total, up to 40 alive at once. Each cleared wave adds 25 zombies and four simultaneous enemies (maximum 80), followed by 15 seconds to prepare. Health, damage and movement speed increase each wave. Nearby zombies detect you within 45 metres with line of sight; firing attracts them within 110 metres. The final five enemies are marked to prevent a long search across the park.
+
+Gun kills award 100 score and 100 dinars; headshots double bullet damage and award 150 of each. Roadkills award 50 of each and wear down the cart. Health regenerates after five seconds without damage. Magazines reload from finite reserves. Slots 2 and 3 remain locked until you obtain those weapons.
+
+Four gold **BOX** map markers identify stations at English Door, the central plaza, lakeside and the fairgrounds. Approach the appropriate pedestal and press **F**: the mystery box costs **950 IQD**, selected-weapon ammunition costs **250 IQD**, and a three-second stationary cart repair costs **750 IQD**. Bring a damaged but drivable cart within 12 metres; a completely disabled cart can be serviced remotely from a station, at its existing location. Moving or taking damage interrupts repair without charging. A mystery box reveals a pistol/rifle/sniper after three seconds; press F again within 20 seconds to claim it. Damage tiers are Standard ×1, Improved ×1.5, Rare ×2.25 and Legendary ×3.4. Equal/lower rewards refill that slot without downgrading it.
+
+Kills have an 8% chance to drop a pickup: **Infinite Ammo** (20 seconds without consuming ammunition or reloading), **Double Dinars** (30 seconds) or **Max Ammo** (instant refill of owned weapons). Walk or drive over one to collect it before its 30-second expiry. Repeated timed pickups refresh duration.
+
+The cart retains its 200 km/h limit, drifting and physical rollovers, but zombies, ramming and crashes damage it. Destruction stops the cart and ejects you to safe nearby ground. Once an overturned cart stops moving, exit with F, stand within five metres and **hold R for three seconds** to right it in place. Recovery does not restore health. The map supports navigation and waypoints; survival disables teleportation. Death ends the run. **Try Again** or **Restart Run** resets weapons, money, pickups, enemies and wave state; local best score, highest completed wave and lifetime kills remain saved in `user://survival_records.json`. Quitting does not save an unfinished run.
+
+Balance and loot settings are in `data/survival_settings.json`; station anchors are in `data/survival_locations.json`. `scenes/survival.tscn`, `scenes/zombie.tscn` and `scenes/mystery_station.tscn` are editable separately. The survival director replaces the ambient crowd during runs, preserving the civilian assets and tools. Three animated Quaternius zombies use head hitboxes derived from their actual skin weights; the pack's headless ribcage model is retained as source but excluded from the roster. Source/license information is in `assets/zombies/quaternius/CREDITS.md`.
+
+Navigation uses a locally bundled three-metre grid across paths and grass, excluding water, buildings, enclosed padel courts and tree trunks. Live scenery adds furniture, nets and station obstacles. To rebuild after changing map/vegetation geometry, run `tools/build_survival_navigation.py` with Python + NumPy. `tools/build_zombie_hitboxes.py` rebuilds bone-relative head hitboxes from the source glTFs. Python is not required to play.
+
+See `SURVIVAL_VALIDATION.md` for gameplay checks and local performance measurements. When preparing a future export, include the non-resource data files (`*.json,*.bin.gz,*.txt,*.md`) in the export filters; this development update does not rebuild a release.
+
 ## Controls
+
+**Audio:** press **Esc → Audio** for Master, Music, Effects and UI volume sliders. Settings save automatically. The background music continues through map/pause menus and new runs, ducking slightly while paused; world sounds pause. Gun types use different recorded shots with overlapping tails. Engine pitch/loudness follows throttle and speed; road rumble, driving wind and tire squeal respond to motion, braking and drifting. Leaving a cart fades its engine out. Footsteps change between paths and grass. Menu hover/click/open/close, reload/empty/equip, pickup, purchase and wave cues are included. Mix/event settings are editable in `data/audio_settings.json`, with credits/licenses in `assets/audio/CREDITS.md` and **Audio Credits** in the menu. All sounds are local files and work offline.
 
 | Input | Action |
 |---|---|
@@ -12,8 +32,8 @@ Open `project.godot` in **Godot 4.7.1** and press **F6** in `scenes/main.tscn`, 
 | Space | Handbrake; tap or hold while turning above 30 km/h to drift |
 | Hold right mouse + move | Orbit the camera; release to recenter |
 | Mouse wheel | Set chase distance between 2.8 and 18 m |
-| F | Exit the current cart; enter a nearby parked vehicle |
-| R | Recover the vehicle to your last safe park path |
+| F | Enter/exit a vehicle, buy supplies, use a box or claim its weapon |
+| R | Reload on foot; hold near a stationary overturned cart to right it |
 | Esc | Pause / resume, or close the map |
 | M | Open / close the full park map |
 
@@ -83,7 +103,7 @@ To drift, accelerate above 30 km/h, turn with A/D or the arrows, and tap or hold
 
 Press **M** to open a north-up stylized map of the actual local park layout. The game pauses while you browse. Scroll to zoom around the cursor, use the + / − buttons, and drag with the right or middle mouse button to pan. **FIT PARK** resets the view; **LOCATE PLAYER** centers your location. Press M or Esc to close.
 
-Click a point on a path or open grass, then choose **Spawn here** or press **Enter**. Double-click a point to spawn directly. Water, building interiors, and areas outside the park are rejected. Points blocked by trees or colliding props shift by up to eight metres to a nearby clear position, shown by the selection marker. The active vehicle or walking character moves there, the camera snaps, and the safe recovery location updates. Vehicle travel also clears speed/drift. Spawning resumes gameplay; closing without spawning restores the prior pause state.
+Click to place a waypoint; gold BOX markers locate weapon, ammunition and repair stations. Survival disables map spawning, Enter-to-spawn and double-click fast travel. Closing the map restores the previous pause state.
 
 The map uses the same bundled OpenStreetMap geometry as the world and works offline. The satellite screenshot guides the appearance and landmarks; imagery and map tiles are not bundled. `scenes/full_map.tscn`, `scripts/full_map.gd`, `scripts/map_canvas.gd`, and `data/map_labels.json` contain the editable map interface, styling, and labels. Divan Door's label is matched to the mapped northern pair of western gates using the supplied entrance reference; English Door uses the established game gate.
 
@@ -115,7 +135,7 @@ Scroll up/down controls chase distance between **2.8 and 18 metres**. Field of v
 
 Top speed is **200 km/h**, with stronger launch acceleration and brakes, and an increased grass deceleration to retain the 40 km/h grass limit. Hard steering above roughly 140 km/h can accumulate enough lateral load to roll the cart. Braking while turning lowers the risk threshold to roughly 120 km/h; gentler inputs and moderate-speed drifts remain controllable. Rollover thresholds, exposure gain and launch/spin are in `data/driving_settings.tres`.
 
-On rollover, `scenes/rollover_body.tscn` supplies real rigid-body motion, collision, gravity, and continuous collision detection. The cart can tumble onto its side or roof; the camera stays level. Press **R** to recover to the last safe path. Map spawning also restores an upright cart. If it settles upright by itself, normal controls resume. Water and leaving the park still recover automatically.
+On rollover, `scenes/rollover_body.tscn` supplies real rigid-body motion, collision, gravity, and continuous collision detection. The cart can tumble onto its side or roof; the camera stays level. Once it stops, exit with F and hold R nearby to right it in place. If it settles upright by itself, normal controls resume. Water and leaving the park recover to nearby valid ground without healing.
 
 ## Southwest sports courts
 

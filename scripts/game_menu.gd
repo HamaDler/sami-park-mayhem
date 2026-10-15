@@ -26,11 +26,12 @@ func _ready() -> void:
     GameUI.label(header,"PAUSED",Vector2(24,7),44,GameUI.INK,true)
     header_context=GameUI.label(header,"SAMI PARK  /  FREE DRIVE",Vector2(432,26),19,GameUI.INK,true)
     _plate(frame,Vector2(0,70),Vector2(760,448),Color(.05,.07,.11,.96))
-    for index in 3:
+    for index in 4:
         var index_copy:=index
-        var button:=GameUI.button(frame,["DRIVE","OPTIONS","CONTROLS"][index],Vector2(18,90+index*58),Vector2(168,48),func():show_tab(index_copy))
+        var button:=GameUI.button(frame,["DRIVE","OPTIONS","AUDIO","CONTROLS"][index],Vector2(18,90+index*58),Vector2(168,48),func():show_tab(index_copy))
         tabs.append(button)
-        var view:=Control.new();view.position=Vector2(216,92);view.size=Vector2(514,392);frame.add_child(view);views.append(view)
+        var view: Control=load("res://scenes/audio_options.tscn").instantiate() if index==2 else Control.new()
+        view.position=Vector2(216,92);view.size=Vector2(514,392);frame.add_child(view);views.append(view)
     GameUI.label(views[0],"BACK TO THE PARK",Vector2.ZERO,29,GameUI.WHITE,true)
     description_label=GameUI.label(views[0],"DRIVE / EXPLORE SAMI PARK",Vector2(0,39),15,GameUI.MUTED)
     resume_button=GameUI.button(views[0],"CONTINUE DRIVING   >",Vector2(0,86),Vector2(500,58),func():resume_requested.emit())
@@ -49,13 +50,13 @@ func _ready() -> void:
     GameUI.label(views[1],"SCROLL",Vector2(345,210),20,GameUI.LIME,true)
     GameUI.label(views[1],"CART 2.8 - 18 m   /   ON FOOT 2.2 - 7 m",Vector2(12,258),19,GameUI.MUTED)
     GameUI.label(views[1],"Lower detail reduces trees and close grass.",Vector2(12,318),17,GameUI.MUTED)
-    GameUI.label(views[2],"KEYBOARD / MOUSE",Vector2.ZERO,29,GameUI.WHITE,true)
+    GameUI.label(views[3],"KEYBOARD / MOUSE",Vector2.ZERO,29,GameUI.WHITE,true)
     var control_names: Array[String]=["MOVE / DRIVE","LOOK / STEER","ENTER / EXIT VEHICLE","JUMP / HANDBRAKE","WEAPON SLOTS","AIM / FIRE","RELOAD / RECOVER","WORLD MAP"]
     var bindings: Array[String]=["WASD / ARROWS","MOUSE / A + D","F","SPACE   |   SHIFT RUN","1 PISTOL / 2 RIFLE / 3 SNIPER","RIGHT / LEFT MOUSE","R","M"]
     for index in control_names.size():
         var y:=58+index*40
-        _row(views[2],control_names[index],y,GameUI.PANEL if index%2==0 else Color("141c28"),36)
-        GameUI.label(views[2],bindings[index],Vector2(228,y+7),15,GameUI.LIME,true)
+        _row(views[3],control_names[index],y,GameUI.PANEL if index%2==0 else Color("141c28"),36)
+        GameUI.label(views[3],bindings[index],Vector2(228,y+7),15,GameUI.LIME,true)
     GameUI.keycap(frame,"ESC",Vector2(18,536),46)
     GameUI.label(frame,"BACK TO GAME",Vector2(76,538),17,GameUI.WHITE,true)
     GameUI.label(frame,"Cart: Daniel Zhabotinsky / CC BY 4.0",Vector2(216,534),13,GameUI.MUTED)
@@ -90,8 +91,8 @@ func set_detail(detail: float) -> void:
         button.add_theme_color_override("font_focus_color",GameUI.INK if selected else GameUI.WHITE)
 
 func set_context(driving: bool) -> void:
-    header_context.text="SAMI PARK  /  FREE DRIVE" if driving else "SAMI PARK  /  ON FOOT"
+    header_context.text="SAMI PARK  /  SURVIVAL"
     resume_button.text="CONTINUE DRIVING   >" if driving else "CONTINUE WALKING   >"
-    recover_button.text="RESET CART" if driving else "RETURN TO SAFE GROUND"
+    recover_button.text="RESTART RUN"
     tabs[0].text="DRIVE" if driving else "ON FOOT"
-    description_label.text="DRIVE / EXPLORE SAMI PARK" if driving else "WALK / EXPLORE SAMI PARK"
+    description_label.text="SURVIVE / EARN DINARS / FIND STRONGER WEAPONS"

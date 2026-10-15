@@ -20,7 +20,7 @@ func set_active(value: bool) -> void:
     active=value
     visible=value
     collision_layer=4 if value else 0
-    collision_mask=3 if value else 0
+    collision_mask=11 if value else 0
     velocity=Vector3.ZERO
     if is_instance_valid(weapons):weapons.set_enabled(value)
 func teleport_to(point: Vector2, yaw: float) -> void:
@@ -29,7 +29,12 @@ func teleport_to(point: Vector2, yaw: float) -> void:
     safe_transform=global_transform;safe_time=0;reset_physics_interpolation()
     if park:park.nature.refresh()
 func recover(reason: String="Returned to safe ground") -> void:
-    global_transform=safe_transform;global_position.y=.15;velocity=Vector3.ZERO
+    var game: Node=get_parent()
+    if game.get("survival"):
+        var point: Vector2=game.survival.safe_point(Vector2(global_position.x,global_position.z),self)
+        global_position=Vector3(point.x,.15,point.y)
+    else:global_transform=safe_transform
+    global_position.y=.15;velocity=Vector3.ZERO
     reset_physics_interpolation();recovered.emit(reason)
     if camera_rig:camera_rig.foot_yaw=rotation.y;camera_rig.snap()
 func _physics_process(delta: float) -> void:
@@ -57,3 +62,6 @@ func _physics_process(delta: float) -> void:
     elif is_on_floor():
         safe_time+=delta
         if safe_time>1:safe_transform=global_transform;safe_time=0
+func receive_hit(amount: float, _point: Vector3, _normal: Vector3) -> void:
+    var game: Node=get_parent()
+    if game.get("survival"):game.survival.damage_player(amount)

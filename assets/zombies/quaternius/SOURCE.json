@@ -1,0 +1,117 @@
+{
+  "url": "https://quaternius.com/packs/zombieapocalypsekit.html",
+  "license": "CC0-1.0",
+  "files": {
+    "Zombie_Basic.gltf": {
+      "bytes": 1703033,
+      "sha256": "c6eab64ef87f89cbd6862b59964b20024ca7e329d3d44f72c76fced6c24861c8",
+      "animations": [
+        "Crawl",
+        "Death",
+        "HitReact",
+        "Idle",
+        "Idle_Attack",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "No",
+        "Punch",
+        "Run",
+        "Run_Arms",
+        "Run_Attack",
+        "Walk",
+        "Wave",
+        "Yes"
+      ],
+      "images": [
+        "embedded"
+      ],
+      "buffers": [
+        "data:application/octet-stream;base64,kqoCPguV"
+      ]
+    },
+    "Zombie_Chubby.gltf": {
+      "bytes": 1671276,
+      "sha256": "7c65bae6f0c5f7754ca177a7de7658fc0e4c8de7c8aff33a872d7ffff57a423c",
+      "animations": [
+        "Crawl",
+        "Death",
+        "HitReact",
+        "Idle",
+        "Idle_Attack",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "No",
+        "Punch",
+        "Run",
+        "Run_Arms",
+        "Run_Attack",
+        "Walk",
+        "Wave",
+        "Yes"
+      ],
+      "images": [
+        "embedded"
+      ],
+      "buffers": [
+        "data:application/octet-stream;base64,aBAfPplt"
+      ]
+    },
+    "Zombie_Arm.gltf": {
+      "bytes": 1313936,
+      "sha256": "6b43b8e282afce1129858cd470430d0f891e83ec2604e0684638c3da3e0c25bf",
+      "animations": [
+        "Death",
+        "HitReact",
+        "Idle",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "No",
+        "Punch",
+        "Run",
+        "Run_Arms",
+        "Run_Attack",
+        "Walk",
+        "Wave",
+        "Yes"
+      ],
+      "images": [
+        "embedded"
+      ],
+      "buffers": [
+        "data:application/octet-stream;base64,MSjmPeYQ"
+      ]
+    },
+    "Zombie_Ribcage.gltf": {
+      "bytes": 443873,
+      "sha256": "3b9ee3e504e34e6b1421076e9c51bc5d6a647350900eb6aa214d0a62491866f3",
+      "animations": [
+        "Crawl",
+        "Death",
+        "HitReact",
+        "Idle",
+        "Jump",
+        "Jump_Idle",
+        "Jump_Land",
+        "Run",
+        "Walk"
+      ],
+      "images": [
+        "embedded"
+      ],
+      "buffers": [
+        "data:application/octet-stream;base64,gAvRvX/N"
+      ]
+    },
+    "Zombie_Atlas.png": {
+      "bytes": 6256,
+      "sha256": "8803e5543d5e6b6f66aa41a5ef93e6c2ffb77b5476d0202296d2f4c8f4eb9e8d"
+    },
+    "License.txt": {
+      "bytes": 374,
+      "sha256": "de990ef6fc68cffd7fd1ae342c4d0c823b541b8848d8f76bca5d3339f4de6f6e"
+    }
+  }
+}

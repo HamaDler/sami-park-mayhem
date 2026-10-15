@@ -55,9 +55,24 @@ static func button(parent: Node, text: String, point: Vector2, dimensions: Vecto
     node.position=point
     node.size=dimensions
     node.pressed.connect(action)
+    node.pressed.connect(func():play_ui("ui_click"))
+    node.mouse_entered.connect(func():
+        if not node.disabled:play_ui("ui_hover"))
+    node.focus_entered.connect(func():
+        if not node.disabled:play_ui("ui_hover"))
     node.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
     parent.add_child(node)
     return node
+static func audio_manager() -> Node:
+    var tree:=Engine.get_main_loop() as SceneTree
+    return tree.root.get_node_or_null("GameAudio") if tree else null
+static func play_ui(event: String) -> void:
+    var audio:=audio_manager()
+    if audio:audio.play_sfx(event)
+static func quit_game() -> void:
+    var audio:=audio_manager()
+    if audio:audio.request_quit()
+    else:(Engine.get_main_loop() as SceneTree).quit()
 static func keycap(parent: Node, text: String, point: Vector2, width: float=32) -> void:
     var panel:=Panel.new()
     panel.position=point
