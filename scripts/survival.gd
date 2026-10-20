@@ -2,6 +2,10 @@ extends Node3D
 signal zombie_killed(id: int, cause: String, headshot: bool)
 signal player_damaged(amount: float)
 signal run_ended
+# kind: "body", "head", "kill", "headkill"; points/label feed the floating score popups.
+signal hit_feedback(kind: String, points: int, label: String)
+# World position the last hit came from; the HUD draws a directional indicator toward it.
+signal player_hit_from(source: Vector3)
 var game: Node3D
 var config: Dictionary
 var health: float=100
@@ -81,32 +85,56 @@ func _physics_process(delta: float) -> void:
     if since_damage>=float(config.player.regeneration_delay):health=minf(float(config.player.max_health),health+float(config.player.regeneration_per_second)*delta)
     cart_damage_time=maxf(0,cart_damage_time-delta)
     _cart_impacts(delta);_timed_action(delta);_recovery(delta)
-func _wave_started(number: int) -> void:announce("WAVE %d  /  %d ZOMBIES" % [number,wave.total])
+func _wave_started(number: int) -> void:_banner("WAVE %d" % number,"%d ZOMBIES INCOMING" % wave.total,GameUI.RED)
 func _wave_completed(number: int) -> void:
-    completed_wave=number;records.save_records(score,completed_wave);announce("WAVE %d CLEARED  /  %ds TO PREPARE" % [number,ceili(wave.preparation)])
-func damage_zombie(zombie: CharacterBody3D, amount: float, headshot: bool, cause: String, point: Vector3) -> void:
+    completed_wave=number;records.save_records(score,completed_wave)
+    _banner("WAVE %d CLEARED" % number,"%dS TO PREPARE" % ceili(wave.preparation),GameUI.LIME)
+func _banner(title: String, subtitle: String, color: Color) -> void:
+    if game.hud.survival_overlay and game.hud.survival_overlay.has_method("show_banner"):game.hud.survival_overlay.show_banner(title,subtitle,color)
+    else:announce(title+"  /  "+subtitle)
+func effects() -> Node3D:return game.player.weapons.effects
+# direction: travel direction of the hit (bullet, kick or cart). force: knockback in m/s.
+func damage_zombie(zombie: CharacterBody3D, amount: float, headshot: bool, cause: String, point: Vector3, direction:=Vector3.ZERO, force: float=-1, stagger: float=0) -> void:
     if over or not zombie.alive or amount<=0:return
+    if direction.length_squared()<.0001:
+        var source: Vector3=game.get_active_actor().global_position
+        direction=(zombie.global_position-source);direction.y=0
+        if direction.length_squared()<.0001:direction=Vector3.FORWARD
+    direction=direction.normalized()
     var applied:=amount*(float(config.weapons.headshot_multiplier) if headshot else 1.0)
     var type: Dictionary=enemies.types.get(zombie.archetype,{})
     if cause=="gun" and not headshot:applied*=float(type.get("body_multiplier",1.0))
     elif cause=="ram":applied*=float(type.get("ram_multiplier",1.0))
     zombie.health-=applied;zombie.alerted=true
-    if cause=="gun":hit_flash=.16;last_hit_headshot=headshot;zombie.hit_time=.12
-    if zombie.health>0:return
+    if cause=="gun":hit_flash=.16;last_hit_headshot=headshot
+    var killed: bool=zombie.health<=0
+    if is_instance_valid(effects()) and cause!="ram":effects().blood_burst(point,direction,headshot or killed)
+    if force<0:force={"gun":2.2 if applied<60 else 4.5,"melee":5.0,"ram":9.0}.get(cause,2.0)
+    if not killed:
+        zombie.apply_hit(direction,force,headshot or applied>=60 or cause=="melee",stagger)
+        if cause!="ram":hit_feedback.emit("head" if headshot else "body",0,"")
+        return
     # This is the only death/reward path. die() clears alive before any signals.
-    zombie.die();kills+=1;wave.register_kill();records.lifetime_kills+=1
+    zombie.die();zombie.apply_hit(direction,force*1.4,true);kills+=1;wave.register_kill();records.lifetime_kills+=1
+    if is_instance_valid(effects()):effects().blood_splat(zombie.global_position,1.4 if headshot else 1.0)
     var economy: Dictionary=config.economy
     var key: String="roadkill" if cause=="ram" else ("headshot" if headshot else "kill")
+    var multiplier: int=2 if rewards.double_dinars>0 else 1
     score+=int(economy[key+"_score"])
-    dinars+=int(economy[key+"_dinars"])*(2 if rewards.double_dinars>0 else 1)
+    dinars+=int(economy[key+"_dinars"])*multiplier
+    hit_feedback.emit("headkill" if headshot else "kill",int(economy[key+"_score"]),{"roadkill":"ROADKILL","headshot":"HEADSHOT"}.get(key,"MELEE" if cause=="melee" else ""))
     rewards.maybe_drop(point);zombie_killed.emit(zombie.id,cause,headshot)
     if kills%10==0:records.save_records(score,completed_wave)
-func damage_target(amount: float) -> void:
+func damage_target(amount: float, source:=Vector3.INF) -> void:
     if game.is_driving():game.active_vehicle.vehicle.receive_damage(amount)
-    else:damage_player(amount)
-func damage_player(amount: float) -> void:
+    else:damage_player(amount,source)
+func damage_player(amount: float, source:=Vector3.INF) -> void:
     if over or amount<=0:return
+    # A well-timed dodge roll avoids the strike entirely.
+    if not game.is_driving() and game.player.has_method("is_invulnerable") and game.player.is_invulnerable():return
     health=maxf(0,health-amount);since_damage=0;damage_flash=.35
+    if source!=Vector3.INF:player_hit_from.emit(source)
+    if health>0 and game.player.has_method("on_damaged"):game.player.on_damaged(amount)
     if game.hud.survival_overlay:game.hud.survival_overlay.workshop.close()
     action.clear();action_progress=0;recovery_time=0;player_damaged.emit(amount)
     if health<=0:end_run()
@@ -114,7 +142,17 @@ func end_run() -> void:
     if over:return
     over=true;action.clear();records.save_records(score,completed_wave)
     game.player.weapons.set_enabled(false);game.player.velocity=Vector3.ZERO
-    run_ended.emit();game.hud.show_game_over();get_tree().paused=true;Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+    run_ended.emit()
+    # Death beat: the character falls in slow motion before the summary appears.
+    var slowmo: float=float(config.player.get("death_slowmo_seconds",0))
+    if slowmo>0 and not game.is_driving():
+        if game.player.has_method("play_death"):game.player.play_death()
+        game.camera_rig.add_trauma(.5)
+        Engine.time_scale=float(config.player.get("death_time_scale",.3))
+        await get_tree().create_timer(slowmo,true,false,true).timeout
+        Engine.time_scale=1.0
+        if not is_inside_tree():return
+    game.hud.show_game_over();get_tree().paused=true;Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 func spend(amount: int) -> bool:
     if dinars<amount:GameUI.play_ui("ui_error");announce("NOT ENOUGH DINARS");return false
     dinars-=amount;GameUI.play_ui("purchase");return true
@@ -190,7 +228,7 @@ func _cart_impacts(delta: float) -> void:
         var now:=Time.get_ticks_msec()
         if now-int(ram_hits.get(zombie.id,-2000))<1000:continue
         ram_hits[zombie.id]=now
-        damage_zombie(zombie,speed*float(config.cart.ram_damage_per_metre_second)*upgrades.ram_damage,false,"ram",zombie.global_position)
+        damage_zombie(zombie,speed*float(config.cart.ram_damage_per_metre_second)*upgrades.ram_damage,false,"ram",zombie.global_position,cart.global_position-before,minf(speed*.6,12))
         cart.receive_damage(float(config.cart.ram_wear)*upgrades.ram_wear)
 func _cart_destroyed() -> void:
     announce("CART DISABLED — FIND A REPAIR STATION")
@@ -203,4 +241,5 @@ func safe_point(point: Vector2, actor: CharacterBody3D) -> Vector2:
     return result.position if result.valid else p
 func announce(text: String) -> void:game.hud.show_toast(text)
 func _exit_tree() -> void:
+    Engine.time_scale=1.0
     if is_instance_valid(records):records.save_records(score,completed_wave)

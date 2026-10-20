@@ -13,11 +13,26 @@ var on_foot: bool=false
 var aiming: bool=false
 var sniper_scope: bool=false
 var snap_through_physics_frame: int=-1
+# Feel: trauma-based shake (strength = trauma²) plus a spring-damped recoil kick.
+var trauma: float=0
+var shake_time: float=0
+var kick_offset:=Vector2.ZERO
+var kick_velocity:=Vector2.ZERO
+var fov_punch: float=0
+var base_fov: float=70
+var noise:=FastNoiseLite.new()
 @onready var arm: SpringArm3D=$SpringArm3D
 @onready var camera: Camera3D=$SpringArm3D/Camera3D
 func _ready() -> void:
     foot_settings=JSON.parse_string(FileAccess.get_file_as_string("res://data/player_settings.json"))
     foot_zoom=float(foot_settings.camera_default_distance)
+    noise.seed=7;noise.frequency=.9
+    base_fov=camera.fov
+func add_trauma(amount: float) -> void:
+    trauma=clampf(trauma+amount,0,1)
+func kick(pitch_amount: float, yaw_amount: float=0) -> void:
+    kick_velocity+=Vector2(pitch_amount,yaw_amount)*28
+    fov_punch=minf(fov_punch+pitch_amount*40,4)
 func initialize(cart: CharacterBody3D) -> void:
     car_zoom=clampf(settings.default_distance,settings.min_distance,settings.max_distance)
     follow_actor(cart,false)
@@ -50,7 +65,10 @@ func _process(delta: float) -> void:
     if Engine.get_physics_frames()<=snap_through_physics_frame:pose=target.global_transform
     global_position=global_position.lerp(pose.origin+Vector3(0,(1.55 if sniper_scope else 1.4) if on_foot else settings.follow_height,0),1-exp(-delta*9))
     var desired_fov: float=22.0 if sniper_scope else (48.0 if on_foot and aiming else settings.field_of_view)
-    camera.fov=lerpf(camera.fov,desired_fov,1-exp(-delta*14))
+    if on_foot and not aiming and target.get("sprinting"):desired_fov+=float(foot_settings.get("sprint_fov_bonus",0))
+    base_fov=lerpf(base_fov,desired_fov,1-exp(-delta*(14 if aiming else 7)))
+    camera.fov=base_fov+fov_punch
+    _update_feel(delta)
     arm.spring_length=lerpf(arm.spring_length,.12 if sniper_scope else zoom_distance,1-exp(-delta*18 if sniper_scope else -delta*10))
     camera.near=.08 if sniper_scope else .35
     arm.position.x=lerpf(arm.position.x,.38 if on_foot and not sniper_scope else 0.0,1-exp(-delta*12))
@@ -59,6 +77,14 @@ func _process(delta: float) -> void:
         if not dragging:orbit_yaw=lerp_angle(orbit_yaw,0,1-exp(-delta*1.2))
         rotation.y=lerp_angle(rotation.y,heading(pose)+orbit_yaw,1-exp(-delta*7))
     arm.rotation.x=pitch
+func _update_feel(delta: float) -> void:
+    # Spring back to zero: stiff enough to recover between pistol shots, damped to avoid wobble.
+    kick_velocity+=(-kick_offset*260-kick_velocity*26)*delta
+    kick_offset+=kick_velocity*delta
+    fov_punch=move_toward(fov_punch,0,delta*30)
+    trauma=maxf(0,trauma-delta*1.6);shake_time+=delta*60
+    var shake: float=trauma*trauma*(.35 if sniper_scope else 1.0)
+    camera.rotation=Vector3(kick_offset.x+noise.get_noise_2d(shake_time,0)*.05*shake,kick_offset.y+noise.get_noise_2d(0,shake_time)*.05*shake,noise.get_noise_2d(shake_time,shake_time)*.04*shake)
 func mouse_look_sensitivity() -> float:
     var base: float=foot_settings.get("mouse_sensitivity",.0035)
     if on_foot and is_instance_valid(target) and Input.is_action_pressed("aim"):

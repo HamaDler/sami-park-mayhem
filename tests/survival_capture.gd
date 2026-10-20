@@ -20,7 +20,7 @@ func run() -> void:
     await RenderingServer.frame_post_draw;root.get_texture().get_image().save_png(OUT+"/survival-gameplay.png")
     game.hud.open_map();await process_frame;await RenderingServer.frame_post_draw
     root.get_texture().get_image().save_png(OUT+"/survival-map.png")
-    game.hud.close_map();s.score=1250;s.kills=12;s.damage_player(1000)
+    game.hud.close_map();s.score=1250;s.kills=12;s.config.player.death_slowmo_seconds=0;s.damage_player(1000)
     await process_frame;await RenderingServer.frame_post_draw
     root.get_texture().get_image().save_png(OUT+"/survival-game-over.png")
     paused=false;game.queue_free();await process_frame;await process_frame;quit()

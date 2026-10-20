@@ -44,7 +44,9 @@ func _ready() -> void:
     foot_hints=Control.new();foot_hints.position=Vector2(32,105);root.add_child(foot_hints);foot_hints.hide()
     GameUI.keycap(foot_hints,"WASD",Vector2.ZERO,62);GameUI.label(foot_hints,"MOVE",Vector2(74,3),16)
     GameUI.keycap(foot_hints,"SPACE",Vector2(147,0),67);GameUI.label(foot_hints,"JUMP",Vector2(226,3),16)
-    GameUI.keycap(foot_hints,"SHIFT",Vector2(300,0),67);GameUI.label(foot_hints,"RUN",Vector2(379,3),16)
+    GameUI.keycap(foot_hints,"SHIFT",Vector2(300,0),67);GameUI.label(foot_hints,"SPRINT",Vector2(379,3),16)
+    GameUI.keycap(foot_hints,"C",Vector2(450,0),32);GameUI.label(foot_hints,"ROLL",Vector2(494,3),16)
+    GameUI.keycap(foot_hints,"V",Vector2(548,0),32);GameUI.label(foot_hints,"MELEE",Vector2(592,3),16)
     gauge=load("res://scenes/speedometer.tscn").instantiate();root.add_child(gauge)
     gauge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
     gauge.offset_left=-308;gauge.offset_top=-290;gauge.offset_right=-18;gauge.offset_bottom=-30

@@ -10,7 +10,8 @@
       "damage": 24,
       "range": 120,
       "recoil": 0.016,
-      "aim_sensitivity_multiplier": 0.7
+      "aim_sensitivity_multiplier": 0.7,
+      "hip_spread": 1.6, "aim_spread": 0.25, "bloom_per_shot": 0.9, "bloom_max": 3.0, "kick": 0.012, "shake": 0.18
     },
     {
       "slot": 2,
@@ -22,7 +23,8 @@
       "damage": 16,
       "range": 230,
       "recoil": 0.022,
-      "aim_sensitivity_multiplier": 0.55
+      "aim_sensitivity_multiplier": 0.55,
+      "hip_spread": 2.2, "aim_spread": 0.45, "bloom_per_shot": 0.35, "bloom_max": 3.5, "kick": 0.007, "shake": 0.12
     },
     {
       "slot": 3,
@@ -34,7 +36,8 @@
       "damage": 85,
       "range": 650,
       "recoil": 0.06,
-      "aim_sensitivity_multiplier": 0.2
+      "aim_sensitivity_multiplier": 0.2,
+      "hip_spread": 5.0, "aim_spread": 0.0, "bloom_per_shot": 2.0, "bloom_max": 4.0, "kick": 0.035, "shake": 0.45
     }
   ]
 }

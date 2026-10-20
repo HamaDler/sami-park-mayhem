@@ -53,3 +53,26 @@ License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0
 Original supplied licenses are preserved as `KENNEY_INTERFACE_LICENSE.txt` and `KENNEY_IMPACT_LICENSE.txt`.
 Selections cover button hover/click, opening/closing menus, confirmation/error, weapon handling, reload clicks, dry firing, wave and pickup cues, three grass/concrete footsteps, metal cart impact and player impact. Reloads use mechanical switch cues, not recorded full firearm-reload sequences.
 Edits: trimmed leading silence, mono PCM16 44.1 kHz, peak normalization and edge fades; hover shortened to 90 ms. Exact source filenames, hashes, duration and processing are recorded in `manifest.json`.
+
+## Zombie voices — CC0
+
+Downloaded 20 October 2026.
+
+**zombie moans**, by **Darsycho**.
+Source: https://opengameart.org/content/zombie-moans
+Original file: darsycho__zombie-moans.ogg. Excerpts bundled as `zombie_groan_0`–`3.wav` and `zombie_death_0`–`1.wav`.
+License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/ (credit appreciated by the author).
+
+**zombie noises and moans**, by **ianzazz**.
+Source: https://opengameart.org/content/zombie-noises-and-moans
+Original archive: zombienoises.zip. `zombienoise2.ogg` → `zombie_groan_4.wav`, `zombienoise3.ogg` → `zombie_attack.wav`, `fastzombie1.ogg` → `zombie_hit.wav`, `zombienoise1.ogg` → `zombie_scream.wav`.
+License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+
+## Melee swings and dodge roll — CC0
+
+**Swishes Sound Pack**, by **artisticdude**.
+Source: https://opengameart.org/content/swishes-sound-pack
+Original archive: swishes.zip. `swish-3.wav` / `swish-7.wav` → `melee_swing_0` / `1.wav`, `swish-11.wav` → `roll_whoosh.wav`.
+License: CC0 1.0 Universal — https://creativecommons.org/publicdomain/zero/1.0/
+
+Edits for all of the above: mono PCM16 44.1 kHz, leading silence trimmed, peak normalization to -3.1 dB and short edge fades. Groans and deaths are cut from one longer recording; excerpt times are listed in `manifest.json`. Zombie sounds are played positionally in 3D. Melee impacts and hitmarkers reuse the Kenney impact/interface files above.

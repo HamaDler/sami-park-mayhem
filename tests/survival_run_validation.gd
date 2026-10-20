@@ -17,21 +17,23 @@ func run() -> void:
     s.config.powerups.drop_chance=0
     var starting_lifetime: int=s.records.lifetime_kills
     var peak_alive: int=0;var attempts: int=0;var saw_final_markers: bool=false
-    while s.kills<100 and attempts<1400:
+    var total: int=int(s.config.waves.first_total);var cap: int=int(s.config.waves.first_active)
+    var economy: Dictionary=s.config.economy;var start_dinars: int=s.dinars
+    while s.kills<total and attempts<1400:
         attempts+=1
         var alive: Array[CharacterBody3D]=s.enemies.living()
         if s.wave.can_spawn(alive.size()):
             s.enemies.spawn_one();alive=s.enemies.living();peak_alive=maxi(peak_alive,alive.size())
-        if (alive.size()>=40 or s.wave.spawned==s.wave.total) and not alive.is_empty():
+        if (alive.size()>=cap or s.wave.spawned==s.wave.total) and not alive.is_empty():
             if s.wave.remaining()<=5:saw_final_markers=true
             var zombie: CharacterBody3D=alive[0]
             s.damage_zombie(zombie,100000,false,"gun",zombie.global_position);zombie.deactivate()
         await frames(1)
-    check(s.kills==100 and s.wave.spawned==100,"An entire real 100-enemy wave spawns and clears")
-    check(peak_alive==40,"Director holds first-wave simultaneous limit at 40")
-    check(s.wave.killed==100 and not s.wave.running,"No stranded budget or phantom enemies at wave completion")
-    check(s.score==10000 and s.dinars==10500,"Complete-wave score and currency accounting")
-    check(s.records.lifetime_kills==starting_lifetime+100,"Every kill contributes once to lifetime records")
+    check(s.kills==total and s.wave.spawned==total,"An entire real first wave spawns and clears")
+    check(peak_alive==cap,"Director holds first-wave simultaneous limit")
+    check(s.wave.killed==total and not s.wave.running,"No stranded budget or phantom enemies at wave completion")
+    check(s.score==total*int(economy.kill_score) and s.dinars==start_dinars+total*int(economy.kill_dinars),"Complete-wave score and currency accounting")
+    check(s.records.lifetime_kills==starting_lifetime+total,"Every kill contributes once to lifetime records")
     check(saw_final_markers,"Final-five marker condition is reached during a real wave")
     check(s.enemies.spawn_one()==null,"Director refuses to spawn during preparation")
     # Exercise actual high-speed collision wear and ram damage on a clear path.
@@ -55,7 +57,7 @@ func run() -> void:
     game.player.teleport_to(Vector2(station.global_position.x,station.global_position.z+3),0)
     s.dinars=1000;s.begin_repair(station);s._timed_action(3.1)
     check(cart.health==cart.max_health and s.dinars==250,"Station can restore a stranded disabled cart without teleporting it")
-    s.score=10000;s.completed_wave=1;s.damage_player(100000)
+    s.score=10000;s.completed_wave=1;s.config.player.death_slowmo_seconds=0;s.damage_player(100000)
     var previous_game: int=game.get_instance_id()
     game.hud.survival_overlay.restart();await frames(8)
     game=current_scene

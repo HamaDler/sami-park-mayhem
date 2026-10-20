@@ -8,6 +8,7 @@ var volumes: Dictionary={}
 var streams: Dictionary={}
 var voices: Array[AudioStreamPlayer]=[]
 var ui_voices: Array[AudioStreamPlayer]=[]
+var voices_3d: Array[AudioStreamPlayer3D]=[]
 var music: AudioStreamPlayer
 var game: Node3D
 var save_delay: float=0
@@ -29,6 +30,10 @@ func _ready() -> void:
         if not streams.has(path):streams[path]=load(path)
     for index in int(settings.voice_limit):voices.append(_voice("SFX",Node.PROCESS_MODE_PAUSABLE))
     for index in 6:ui_voices.append(_voice("UI",Node.PROCESS_MODE_ALWAYS))
+    for index in int(settings.spatial.voice_limit):
+        var spatial:=AudioStreamPlayer3D.new();spatial.bus="SFX";spatial.process_mode=Node.PROCESS_MODE_PAUSABLE
+        spatial.unit_size=float(settings.spatial.unit_size);spatial.max_distance=float(settings.spatial.max_distance)
+        spatial.attenuation_filter_cutoff_hz=6000;add_child(spatial);voices_3d.append(spatial)
     music=_voice("Music",Node.PROCESS_MODE_ALWAYS)
     music.name="ContinuousMusic";music.stream=load(DIRECTORY+str(settings.music.file))
     if music.stream is AudioStreamOggVorbis:music.stream.loop=true
@@ -88,13 +93,36 @@ func play_sfx(event: String, extra_db: float=0) -> void:
     voice.stream=get_stream(str(definition.file))
     voice.volume_db=float(definition.db)+extra_db
     var variation: float=definition.get("pitch_variation",0.0)
-    voice.pitch_scale=1.0+random.randf_range(-variation,variation)
+    voice.pitch_scale=float(definition.get("pitch",1.0))+random.randf_range(-variation,variation)
     if playback_enabled:voice.play()
     sound_played.emit(event)
 func play_weapon(slot: int) -> void:play_sfx(["pistol","rifle","sniper"][clampi(slot,1,3)-1])
+# Positional effects (zombies). Separate bounded pool; far voices are stolen first.
+func play_at(event: String, point: Vector3, extra_db: float=0) -> void:
+    if not settings.events.has(event) or get_tree().paused or voices_3d.is_empty():return
+    var listener: Vector3=_listener_position()
+    var distance: float=listener.distance_to(point)
+    if distance>float(settings.spatial.max_distance):return
+    var voice: AudioStreamPlayer3D=null;var farthest: float=-1
+    for candidate in voices_3d:
+        if not candidate.playing:voice=candidate;break
+        var d: float=candidate.global_position.distance_to(listener)
+        if d>farthest:farthest=d;voice=candidate
+    if voice.playing and farthest<distance:return
+    var definition: Dictionary=settings.events[event]
+    voice.stop();voice.stream=get_stream(str(definition.file));voice.global_position=point
+    voice.volume_db=float(definition.db)+extra_db
+    var variation: float=definition.get("pitch_variation",0.0)
+    voice.pitch_scale=float(definition.get("pitch",1.0))+random.randf_range(-variation,variation)
+    if playback_enabled:voice.play()
+    sound_played.emit(event)
+func _listener_position() -> Vector3:
+    var camera: Camera3D=get_viewport().get_camera_3d()
+    return camera.global_position if camera else Vector3.ZERO
 func bind_game(scene: Node3D) -> void:
     game=scene;foot_distance=0;previous_distance=game.player.distance_m;previous_floor=true
     for voice in voices:voice.stop()
+    for voice in voices_3d:voice.stop()
     game.survival.wave.started.connect(func(_number: int):play_sfx("wave_start"))
     game.survival.wave.completed.connect(func(_number: int):play_sfx("wave_clear"))
     game.survival.player_damaged.connect(func(_amount: float):play_sfx("player_hit"))
@@ -126,6 +154,7 @@ func _exit_tree() -> void:
 func stop_all() -> void:
     for voice in voices:voice.stop();voice.stream=null
     for voice in ui_voices:voice.stop();voice.stream=null
+    for voice in voices_3d:voice.stop();voice.stream=null
     if music:music.stop();music.stream=null
     streams.clear()
 func request_quit() -> void:

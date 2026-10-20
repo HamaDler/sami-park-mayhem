@@ -11,6 +11,8 @@ var positions: Dictionary={}
 var refresh_clock: float=0
 var types: Dictionary
 var scream_notice: float=0
+var groan_clock: float=1.5
+var sound_times: Dictionary={}
 func initialize(session: Node) -> void:
     survival=session;settings=survival.config.zombies;random.randomize()
     types=JSON.parse_string(FileAccess.get_file_as_string("res://data/zombie_types.json"))
@@ -27,6 +29,7 @@ func living() -> Array[CharacterBody3D]:
 func _physics_process(delta: float) -> void:
     if not survival or survival.over:return
     scream_notice=maxf(0,scream_notice-delta)
+    _ambient_groans(delta)
     refresh_clock-=delta
     if refresh_clock<=0:
         refresh_clock=.15;positions.clear()
@@ -44,7 +47,7 @@ func _physics_process(delta: float) -> void:
     var corpses: Array=[]
     for zombie in pool:
         if not zombie.alive and zombie.visible:corpses.append(zombie)
-    while corpses.size()>int(settings.max_corpses):corpses.pop_front().deactivate()
+    while corpses.size()>int(settings.max_corpses):corpses.pop_front().start_sink()
 func spawn_one() -> CharacterBody3D:
     if not survival.wave.can_spawn(living().size()):return null
     var candidate:=spawn_position()
@@ -58,6 +61,9 @@ func spawn_one() -> CharacterBody3D:
         zombie=load("res://scenes/zombie.tscn").instantiate();add_child(zombie)
         zombie.build(self,models[model_index],model_index);pool.append(zombie)
     zombie.activate(candidate,next_id,type_stats(maxi(1,survival.wave.number),kind))
+    # Fast pacing: early waves come straight at the player; later waves mix in wanderers.
+    var waves: Dictionary=survival.config.waves
+    if survival.wave.number<=int(waves.get("always_alerted_waves",0)) or random.randf()<float(waves.get("late_alerted_chance",0)):zombie.alerted=true
     next_id+=1;survival.wave.register_spawn()
     return zombie
 func roll_type(number: int) -> String:
@@ -137,3 +143,37 @@ func separation(zombie: CharacterBody3D, point: Vector2) -> Vector2:
                 var d:=difference.length()
                 if d>0.01 and d<1.1:result+=difference/d*(1.1-d)
     return result.limit_length(1.0)
+func play_sound(zombie: CharacterBody3D, event: String, extra_db: float=0, throttle: float=0) -> void:
+    if throttle>0:
+        var now: float=Time.get_ticks_msec()/1000.0
+        if now-float(sound_times.get(event,-10.0))<throttle:return
+        sound_times[event]=now
+    var audio: Node=GameUI.audio_manager()
+    if audio and audio.has_method("play_at"):audio.play_at(event,zombie.global_position+Vector3.UP*1.5,extra_db)
+# Every 1.5–3 s one of the closest living zombies groans, so the horde is audible before it is visible.
+func _ambient_groans(delta: float) -> void:
+    groan_clock-=delta
+    if groan_clock>0:return
+    groan_clock=random.randf_range(1.5,3.0)
+    var listener: Vector3=survival.game.get_active_actor().global_position
+    var candidates: Array[CharacterBody3D]=[]
+    for zombie in pool:
+        if zombie.alive and zombie.global_position.distance_to(listener)<45:candidates.append(zombie)
+    if candidates.is_empty():return
+    candidates.sort_custom(func(a: CharacterBody3D,b: CharacterBody3D):return a.global_position.distance_squared_to(listener)<b.global_position.distance_squared_to(listener))
+    var pick: CharacterBody3D=candidates[random.randi_range(0,mini(3,candidates.size()-1))]
+    play_sound(pick,"zombie_groan_%d" % random.randi_range(0,4),0.0 if pick.alerted else -5.0)
+# Cone check in front of the player; returns the number of zombies struck.
+func apply_melee(origin: Vector3, forward: Vector3, reach: float, angle_degrees: float, amount: float, force: float, stagger: float) -> int:
+    var count: int=0
+    var cos_limit: float=cos(deg_to_rad(angle_degrees*.5))
+    for zombie in pool:
+        if not zombie.alive:continue
+        var offset: Vector3=zombie.global_position-origin;offset.y=0
+        var distance: float=offset.length()
+        if distance>reach+.35:continue
+        if distance>.3 and offset.normalized().dot(forward)<cos_limit:continue
+        if not line_of_sight(origin+Vector3.UP,zombie.global_position+Vector3.UP):continue
+        survival.damage_zombie(zombie,amount,false,"melee",zombie.global_position+Vector3.UP*1.1,forward,force,stagger)
+        count+=1
+    return count

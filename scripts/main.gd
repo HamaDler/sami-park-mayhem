@@ -29,7 +29,7 @@ func get_active_actor() -> CharacterBody3D:
     return player if is_instance_valid(player) else get_node_or_null("GolfCart")
 func is_driving() -> bool:return is_instance_valid(active_vehicle)
 func _setup_inputs() -> void:
-    var bindings: Dictionary={"accelerate":[KEY_W,KEY_UP],"reverse":[KEY_S,KEY_DOWN],"left":[KEY_A,KEY_LEFT],"right":[KEY_D,KEY_RIGHT],"brake":[KEY_SPACE],"jump":[KEY_SPACE],"recover":[KEY_R],"pause":[KEY_ESCAPE],"map_toggle":[KEY_M],"interact":[KEY_F],"sprint":[KEY_SHIFT],"weapon_1":[KEY_1],"weapon_2":[KEY_2],"weapon_3":[KEY_3]}
+    var bindings: Dictionary={"accelerate":[KEY_W,KEY_UP],"reverse":[KEY_S,KEY_DOWN],"left":[KEY_A,KEY_LEFT],"right":[KEY_D,KEY_RIGHT],"brake":[KEY_SPACE],"jump":[KEY_SPACE],"recover":[KEY_R],"pause":[KEY_ESCAPE],"map_toggle":[KEY_M],"interact":[KEY_F],"sprint":[KEY_SHIFT],"weapon_1":[KEY_1],"weapon_2":[KEY_2],"weapon_3":[KEY_3],"melee":[KEY_V],"roll":[KEY_C]}
     for action: String in bindings:
         if not InputMap.has_action(action):InputMap.add_action(action)
         for key in bindings[action]:

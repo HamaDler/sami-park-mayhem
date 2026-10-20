@@ -17,6 +17,16 @@ var weapon_models: Array[Node3D]=[]
 var current_animation: String=""
 var recoil: float=0
 var move_input:=Vector2.ZERO
+# Procedural weapon handling (0..1): raise after switching, reload progress, sprint lowering.
+var weapon_raise: float=0
+var reload_progress: float=0
+var sprinting: bool=false
+var weapon_lower: float=0
+var fire_push: float=0
+# One-shot action clip layered over locomotion (roll, kick, hit, death).
+var action_time: float=0
+var action_ik: bool=true
+const MOUNT_BASE:=Vector3(.17,1.22,-.23)
 func _ready() -> void:
     settings=JSON.parse_string(FileAccess.get_file_as_string("res://data/player_settings.json"))
     model=$Model
@@ -30,7 +40,7 @@ func _ready() -> void:
         library.add_animation(clip_name,clip)
     animations.remove_animation_library("");animations.add_animation_library("",library)
     model.scale=Vector3.ONE*float(settings.standing_scale)
-    weapon_mount=Node3D.new();weapon_mount.name="WeaponMount";weapon_mount.position=Vector3(.17,1.22,-.23);add_child(weapon_mount)
+    weapon_mount=Node3D.new();weapon_mount.name="WeaponMount";weapon_mount.position=MOUNT_BASE;add_child(weapon_mount)
     for slot in range(1,4):
         var weapon:=GunModels.build(slot);weapon_mount.add_child(weapon);weapon.visible=false;weapon_models.append(weapon)
     _play("Idle_Neutral");animations.advance(0)
@@ -44,6 +54,7 @@ func set_seated(cart: CharacterBody3D) -> void:
     model.scale=Vector3.ONE*float(settings.seated_scale)
     _pose_driver()
 func set_weapon(slot: int) -> void:
+    if slot!=equipped_slot and slot>0 and not seated:weapon_lower=1
     equipped_slot=slot;weapon_mount.visible=slot>0 and not seated and not first_person_view
     for i in weapon_models.size():weapon_models[i].visible=i+1==slot
 func set_first_person_view(value: bool) -> void:
@@ -52,18 +63,49 @@ func set_first_person_view(value: bool) -> void:
     weapon_mount.visible=equipped_slot>0 and not seated and not value
 func set_motion(value: float, on_ground: bool, aim: bool, pitch: float) -> void:
     speed=value;grounded=on_ground;aiming=aim;aim_pitch=pitch
+func play_action(clip_name: String, duration: float, keep_ik: bool=false) -> void:
+    var full: String="CharacterArmature|"+clip_name
+    if not animations.has_animation(full):return
+    current_animation=full;action_time=duration;action_ik=keep_ik
+    animations.play(full,.08);animations.seek(0,false)
+    animations.speed_scale=animations.get_animation(full).length/maxf(duration,.05)
+func cancel_action() -> void:action_time=0
+# Exactly one clip per frame: calling _play twice with different clips restarts the
+# animation every frame and freezes the pose.
+func _locomotion_clip() -> String:
+    if not grounded:return "Idle_Neutral"
+    if speed<=.2:return "Idle_Gun" if equipped_slot>0 else "Idle_Neutral"
+    var sideways: bool=absf(move_input.x)>absf(move_input.y)
+    if sprinting and not aiming and not sideways:return "Run"
+    if equipped_slot==0:
+        if sideways:return "Run_Left" if move_input.x<0 else "Run_Right"
+        return "Run_Back" if move_input.y>.2 else "Walk"
+    if move_input.y>.2 and not sideways:return "Run_Back"
+    if sideways:return "Run_Left" if move_input.x<0 else "Run_Right"
+    return "Run_Shoot"
+func on_fire() -> void:fire_push=1
 func get_weapon() -> Node3D:return weapon_models[equipped_slot-1] if equipped_slot>0 else null
 func _process(delta: float) -> void:
     if not is_visible_in_tree():return
     if seated:_pose_driver();return
-    _play("Idle_Neutral" if not grounded else ("Run_Shoot" if speed>.2 and equipped_slot>0 else ("Walk" if speed>.2 else ("Idle_Gun" if equipped_slot>0 else "Idle_Neutral"))))
-    if grounded and speed>.2 and equipped_slot>0:
-        if move_input.y>.2:_play("Run_Back")
-        elif absf(move_input.x)>absf(move_input.y):_play("Run_Left" if move_input.x<0 else "Run_Right")
-    animations.speed_scale=clampf(speed/5.5,.55,1.3) if speed>.2 else 1.0
-    animations.advance(delta)
+    if action_time>0:
+        action_time=maxf(0,action_time-delta)
+        animations.advance(delta)
+        weapon_mount.visible=equipped_slot>0 and action_ik and not first_person_view
+        if not action_ik:return
+    else:
+        weapon_mount.visible=equipped_slot>0 and not first_person_view
+        _play(_locomotion_clip())
+        animations.speed_scale=clampf(speed/5.5,.55,1.35) if speed>.2 else 1.0
+        animations.advance(delta)
     recoil=move_toward(recoil,0,delta*5)
-    weapon_mount.rotation.x=aim_pitch*.75-recoil
+    fire_push=move_toward(fire_push,0,delta*14)
+    # Lower the gun while sprinting or just after switching; dip and roll it during reloads.
+    var reload_dip: float=sin(clampf(reload_progress,0,1)*PI)
+    var lower_target: float=maxf(weapon_raise,.85 if sprinting and not aiming else 0.0)
+    weapon_lower=lerpf(weapon_lower,maxf(lower_target,reload_dip*.55),1-exp(-delta*14))
+    weapon_mount.position=MOUNT_BASE+Vector3(-.04*weapon_lower,-.22*weapon_lower,.10*weapon_lower+recoil*1.6+fire_push*.025)
+    weapon_mount.rotation=Vector3(aim_pitch*.75*(1-weapon_lower)-recoil-weapon_lower*.85,weapon_lower*.35,reload_dip*.7)
     if equipped_slot>0:
         var weapon:=get_weapon()
         _solve_arm("R",weapon.get_node("GripRight").global_position,to_global(Vector3(.36,1.08,.02)))

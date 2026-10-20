@@ -28,7 +28,25 @@
     "step_grass_2": {"file": "step_grass_2.wav", "db": -17.0, "pitch_variation": 0.05},
     "step_path_0": {"file": "step_path_0.wav", "db": -18.0, "pitch_variation": 0.04},
     "step_path_1": {"file": "step_path_1.wav", "db": -18.0, "pitch_variation": 0.04},
-    "step_path_2": {"file": "step_path_2.wav", "db": -18.0, "pitch_variation": 0.04}
+    "step_path_2": {"file": "step_path_2.wav", "db": -18.0, "pitch_variation": 0.04},
+    "hitmarker": {"file": "dry_fire.wav", "db": -15.0, "pitch_variation": 0.04, "pitch": 1.45},
+    "hitmarker_head": {"file": "dry_fire.wav", "db": -12.0, "pitch_variation": 0.03, "pitch": 1.9},
+    "kill_confirm": {"file": "player_hit.wav", "db": -16.0, "pitch_variation": 0.05, "pitch": 1.6},
+    "melee_swing_0": {"file": "melee_swing_0.wav", "db": -9.0, "pitch_variation": 0.08},
+    "melee_swing_1": {"file": "melee_swing_1.wav", "db": -9.0, "pitch_variation": 0.08},
+    "melee_hit": {"file": "player_hit.wav", "db": -7.0, "pitch_variation": 0.08, "pitch": 0.8},
+    "roll": {"file": "roll_whoosh.wav", "db": -10.0, "pitch_variation": 0.06, "pitch": 0.7},
+    "zombie_groan_0": {"file": "zombie_groan_0.wav", "db": -6.0, "pitch_variation": 0.12},
+    "zombie_groan_1": {"file": "zombie_groan_1.wav", "db": -6.0, "pitch_variation": 0.12},
+    "zombie_groan_2": {"file": "zombie_groan_2.wav", "db": -6.0, "pitch_variation": 0.12},
+    "zombie_groan_3": {"file": "zombie_groan_3.wav", "db": -6.0, "pitch_variation": 0.12},
+    "zombie_groan_4": {"file": "zombie_groan_4.wav", "db": -6.0, "pitch_variation": 0.12},
+    "zombie_attack": {"file": "zombie_attack.wav", "db": -3.0, "pitch_variation": 0.1},
+    "zombie_hit": {"file": "zombie_hit.wav", "db": -7.0, "pitch_variation": 0.15},
+    "zombie_death_0": {"file": "zombie_death_0.wav", "db": -4.0, "pitch_variation": 0.1},
+    "zombie_death_1": {"file": "zombie_death_1.wav", "db": -4.0, "pitch_variation": 0.1},
+    "zombie_scream": {"file": "zombie_scream.wav", "db": 0.0, "pitch_variation": 0.05, "pitch": 1.15}
   },
+  "spatial": {"voice_limit": 14, "unit_size": 6.0, "max_distance": 70.0},
   "vehicle": {"engine_db": -11.0, "rolling_db": -19.0, "skid_db": -9.0, "wind_db": -23.0, "min_engine_pitch": 0.7, "max_engine_pitch": 1.85, "audible_distance": 75.0}
 }

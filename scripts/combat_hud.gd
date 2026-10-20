@@ -1,6 +1,8 @@
 extends Control
 var player: CharacterBody3D
 var game: Node3D
+var crosshair_gap: float=8
+var crosshair_alpha: float=1
 func _ready() -> void:mouse_filter=Control.MOUSE_FILTER_IGNORE
 func _process(_delta: float) -> void:queue_redraw()
 func _draw() -> void:
@@ -21,10 +23,27 @@ func _draw() -> void:
             for i in range(-3,4):
                 if i!=0:draw_line(center+Vector2(i*25,-4),center+Vector2(i*25,4),Color(0,0,0,.9),1,true)
         else:
-            var gap:=4 if weapons.aiming else 8
+            # Gap tracks the real bullet cone so the crosshair blooms with sustained fire and movement.
+            var camera: Camera3D=game.camera_rig.camera
+            var pixels_per_degree: float=size.y/maxf(camera.fov,1.0)
+            var target_gap: float=clampf(3+weapons.spread_degrees()*pixels_per_degree,3,90)
+            crosshair_gap=lerpf(crosshair_gap,target_gap,.35)
+            var lowered: bool=player.get("sprinting") or player.is_busy() or weapons.raise_time>0
+            crosshair_alpha=lerpf(crosshair_alpha,0.0 if lowered else 1.0,.3)
             for direction in [Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2.DOWN]:
-                draw_line(center+direction*gap,center+direction*(gap+7),Color(0,0,0,.7),3,true)
-                draw_line(center+direction*gap,center+direction*(gap+7),GameUI.WHITE,1.5,true)
+                draw_line(center+direction*crosshair_gap,center+direction*(crosshair_gap+7),Color(0,0,0,.7*crosshair_alpha),3,true)
+                draw_line(center+direction*crosshair_gap,center+direction*(crosshair_gap+7),Color(1,1,1,crosshair_alpha),1.5,true)
+            draw_circle(center,1.2,Color(1,1,1,.8*crosshair_alpha))
+            var magazine: int=int(weapons.current().magazine);var loaded: int=int(weapons.rounds[weapons.selected_slot])
+            var warning: String=""
+            if weapons.reload_time>0:warning="RELOADING"
+            elif not weapons.infinite_ammo and loaded==0:warning="NO AMMO" if int(weapons.reserve[weapons.selected_slot])==0 and weapons.survival_enabled else "RELOAD"
+            elif not weapons.infinite_ammo and loaded<=ceili(magazine*.25):warning="R  RELOAD"
+            if warning!="":
+                var width: float=GameUI.bold().get_string_size(warning,HORIZONTAL_ALIGNMENT_LEFT,-1,17).x
+                var tone: Color=GameUI.RED if warning=="NO AMMO" else (GameUI.LIME if warning=="RELOADING" else Color("ffd268"))
+                tone.a=.65+.35*sin(Time.get_ticks_msec()*.008) if warning!="RELOADING" else .9
+                draw_string(GameUI.bold(),center+Vector2(-width*.5,58),warning,HORIZONTAL_ALIGNMENT_LEFT,-1,17,tone)
     var point:=Vector2(size.x-360,size.y-174)
     var dimensions:=Vector2(332,134)
     draw_colored_polygon(PackedVector2Array([point,point+Vector2(320,0),point+Vector2(332,12),point+dimensions,point+Vector2(12,134),point+Vector2(0,122)]),Color(.025,.04,.065,.9))
@@ -36,8 +55,8 @@ func _draw() -> void:
     if weapons.infinite_ammo:ammo="∞"
     draw_string(GameUI.bold(),point+Vector2(17,87),ammo,HORIZONTAL_ALIGNMENT_LEFT,-1,51,GameUI.WHITE)
     draw_string(GameUI.regular(),point+Vector2(85,82),"/ "+str(int(weapons.reserve[weapons.selected_slot]) if weapons.survival_enabled else int(weapons.current().magazine)),HORIZONTAL_ALIGNMENT_LEFT,-1,24,GameUI.MUTED)
-    draw_string(GameUI.regular(),point+Vector2(177,63),"R  RELOAD",HORIZONTAL_ALIGNMENT_LEFT,-1,16,GameUI.MUTED)
-    draw_string(GameUI.regular(),point+Vector2(177,84),"RMB AIM / LMB FIRE",HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.MUTED)
+    draw_string(GameUI.regular(),point+Vector2(177,63),"R RELOAD  /  V MELEE",HORIZONTAL_ALIGNMENT_LEFT,-1,16,GameUI.MUTED)
+    draw_string(GameUI.regular(),point+Vector2(177,84),"C ROLL  /  RMB AIM",HORIZONTAL_ALIGNMENT_LEFT,-1,14,GameUI.MUTED)
     for slot in range(1,4):
         var x:=point.x+14+(slot-1)*103
         var selected: bool=weapons.selected_slot==slot

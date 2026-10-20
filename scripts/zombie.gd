@@ -35,6 +35,15 @@ var scream_cooldown: float=0
 var scream_time: float=0
 var scream_ring: MeshInstance3D
 var armor_helmet: MeshInstance3D
+# Feel: knockback that decays, short slow-down stagger on light hits, lunge during attack windup,
+# and corpses that sink into the ground instead of vanishing.
+var knockback:=Vector2.ZERO
+var stagger_time: float=0
+var lunge:=Vector2.ZERO
+var sink_time: float=0
+var model_base_y: float=0
+const WALK_CLIP_SPEED: float=1.6
+const RUN_CLIP_SPEED: float=4.0
 func build(owner_manager: Node3D, packed: PackedScene, _variant: int) -> void:
     manager=owner_manager
     model_index=_variant
@@ -45,6 +54,7 @@ func build(owner_manager: Node3D, packed: PackedScene, _variant: int) -> void:
     var target_height: float=1.75
     model.scale=Vector3.ONE*target_height/maxf(maximum,.5)
     model.rotation.y=PI
+    model_base_y=model.position.y
     var animations:=model.find_children("*","AnimationPlayer",true,false)
     assert(not animations.is_empty(),"Zombie asset must include animations")
     animator=animations[0];animator.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
@@ -82,13 +92,15 @@ func activate(point: Vector2, identifier: int, stats: Dictionary) -> void:
     _set_type(str(stats.get("kind","walker")))
     scream_cooldown=manager.random.randf_range(3,6);scream_time=0
     alive=true;alerted=false;corpse_time=0;hit_time=0;spawn_cooldown=1
+    knockback=Vector2.ZERO;stagger_time=0;lunge=Vector2.ZERO;sink_time=0;model.position.y=model_base_y;animator.speed_scale=1
     attack_time=0;attack_cooldown=0;think_time=manager.random.randf_range(0,.2);route_time=0;stuck_time=0
     heading=Vector2.ZERO;route.clear();route_index=0;wander_time=0;clip=""
     global_position=Vector3(point.x,.06,point.y);velocity=Vector3.ZERO;last_position=point
     collision_layer=8;body_box.collision_layer=16;head_box.collision_layer=32
     visible=true;set_physics_process(true);reset_physics_interpolation();_animate("Idle")
 func deactivate() -> void:
-    alive=false;visible=false;collision_layer=0
+    alive=false;visible=false;collision_layer=0;sink_time=0
+    if model:model.position.y=model_base_y
     if body_box:body_box.collision_layer=0
     if head_box:head_box.collision_layer=0
     set_physics_process(false)
@@ -96,25 +108,54 @@ func die() -> void:
     if not alive:return
     alive=false;collision_layer=0;body_box.collision_layer=0;head_box.collision_layer=0
     velocity=Vector3.ZERO;attack_time=0;corpse_time=float(manager.settings.corpse_seconds)
-    scream_time=0
+    scream_time=0;stagger_time=0;lunge=Vector2.ZERO
     if scream_ring:scream_ring.hide()
+    animator.speed_scale=1
     _animate("Death",true)
+    manager.play_sound(self,"zombie_death_%d" % manager.random.randi_range(0,1))
+# Called by the survival damage path. Light hits slow the zombie briefly; heavy hits
+# (sniper, headshot, melee) play the full flinch.
+func apply_hit(direction: Vector3, force: float, heavy: bool, stagger: float=0) -> void:
+    var push:=Vector2(direction.x,direction.z)
+    if push.length_squared()>.0001:knockback+=push.normalized()*force
+    knockback=knockback.limit_length(9)
+    if not alive:return
+    lunge=Vector2.ZERO
+    if heavy or stagger>0:
+        hit_time=maxf(hit_time,stagger if stagger>0 else .45);attack_time=0
+        clip="";_animate("HitReact",true)
+    else:stagger_time=maxf(stagger_time,.15)
+    manager.play_sound(self,"zombie_hit",-4.0,.35)
+func start_sink() -> void:
+    if alive or not visible or sink_time>0:return
+    corpse_time=0;sink_time=float(manager.settings.get("corpse_sink_seconds",1.5))
 func receive_hit(amount: float, point: Vector3, _normal: Vector3) -> void:
     manager.survival.damage_zombie(self,amount,false,"gun",point)
 func _physics_process(delta: float) -> void:
     if not alive:
-        corpse_time-=delta
-        _advance_animation(delta,15)
-        if corpse_time<=0:deactivate()
+        # Death slide from the killing hit, then lie still, then sink and recycle.
+        if knockback.length_squared()>.01:
+            velocity=Vector3(knockback.x,-2,knockback.y);knockback=knockback.move_toward(Vector2.ZERO,delta*14);move_and_slide()
+        _advance_animation(delta,20)
+        if sink_time>0:
+            sink_time=maxf(0,sink_time-delta)
+            var depth: float=1-sink_time/float(manager.settings.get("corpse_sink_seconds",1.5))
+            model.position.y=model_base_y-depth*depth*1.1
+            if sink_time==0:deactivate()
+        else:
+            corpse_time-=delta
+            if corpse_time<=0:start_sink()
         return
-    if manager.survival.over:return
+    if manager.survival.over:
+        if attack_time<=0:_animate("Idle")
+        animator.speed_scale=1;_advance_animation(delta,20);return
     var actor: CharacterBody3D=manager.survival.game.get_active_actor()
     var point:=Vector2(global_position.x,global_position.z)
     var target:=Vector2(actor.global_position.x,actor.global_position.z)
     var distance:=point.distance_to(target)
     spawn_cooldown=maxf(0,spawn_cooldown-delta)
     scream_cooldown=maxf(0,scream_cooldown-delta)
-    attack_cooldown=maxf(0,attack_cooldown-delta);hit_time=maxf(0,hit_time-delta)
+    attack_cooldown=maxf(0,attack_cooldown-delta);hit_time=maxf(0,hit_time-delta);stagger_time=maxf(0,stagger_time-delta)
     think_time-=delta;route_time-=delta
     if think_time<=0:
         think_time=float(manager.survival.config.navigation.think_interval)+manager.random.randf_range(0,.04)
@@ -131,9 +172,15 @@ func _physics_process(delta: float) -> void:
             if alerted and manager.line_of_sight(global_position+Vector3.UP,actor.global_position+Vector3.UP):manager.scream(self)
     elif attack_time>0:
         attack_time-=delta
+        # Telegraphed lunge in the first half of the windup; the strike lands at the end.
+        var windup: float=float(manager.settings.attack_windup)
+        var lunge_speed: float=float(manager.settings.get("lunge_speed",0))*(1.0 if attack_time>windup*.5 else 0.0)
+        if lunge_speed>0 and distance>.9:lunge=(target-point).normalized()*lunge_speed
+        else:lunge=Vector2.ZERO
+        if (target-point).length_squared()>.01:rotation.y=lerp_angle(rotation.y,atan2(-(target-point).x,-(target-point).y),1-exp(-delta*10))
         if attack_time<=0 and distance<_attack_range(actor)+.45 and manager.line_of_sight(global_position+Vector3.UP,actor.global_position+Vector3.UP):
-            manager.survival.damage_target(damage)
-        velocity.x=0;velocity.z=0
+            manager.survival.damage_target(damage,global_position)
+        velocity.x=lunge.x;velocity.z=lunge.y
     elif hit_time>0:
         velocity.x=0;velocity.z=0;_animate("HitReact",true)
     else:
@@ -149,9 +196,19 @@ func _physics_process(delta: float) -> void:
             if not manager.navigation.walkable(point+avoid*1.5):avoid=-avoid
             direction=avoid if manager.navigation.walkable(point+avoid*1.5) else Vector2.ZERO
         var movement_speed:=move_speed if alerted else move_speed*.4
+        if stagger_time>0:movement_speed*=.4
         velocity.x=direction.x*movement_speed;velocity.z=direction.y*movement_speed
         if direction.length_squared()>.01:rotation.y=lerp_angle(rotation.y,atan2(-direction.x,-direction.y),1-exp(-delta*8))
-        _animate("Run" if alerted and move_speed>2.7 else ("Walk" if direction.length_squared()>.01 else "Idle"))
+        var running: bool=alerted and move_speed>2.7
+        _animate("Run" if running else ("Walk" if direction.length_squared()>.01 else "Idle"))
+        # Match stride to ground speed so feet don't skate.
+        var clip_speed: float=RUN_CLIP_SPEED if running else WALK_CLIP_SPEED
+        animator.speed_scale=clampf(movement_speed/clip_speed,.6,1.8) if direction.length_squared()>.01 else 1.0
+    if knockback.length_squared()>.01:
+        velocity.x+=knockback.x;velocity.z+=knockback.y
+        knockback=knockback.move_toward(Vector2.ZERO,delta*18)
+    if hit_time>0 or attack_time>0 or scream_time>0:
+        if clip!="Run" and clip!="Walk":animator.speed_scale=1
     velocity.y=-.5 if is_on_floor() else velocity.y-20*delta
     move_and_slide()
     if distance<55:_advance_animation(delta,30)
@@ -169,12 +226,15 @@ func _think(point: Vector2, target: Vector2, distance: float, actor: CharacterBo
     if alerted:
         if archetype=="screamer" and scream_cooldown==0 and spawn_cooldown==0 and distance<float(manager.types.screamer.scream_range) and distance>_attack_range(actor)+1 and manager.line_of_sight(global_position+Vector3.UP,actor.global_position+Vector3.UP):
             scream_time=float(manager.types.screamer.scream_windup);scream_cooldown=float(manager.types.screamer.scream_cooldown)
-            _animate("Jump",true);return
+            _animate("Jump",true);manager.play_sound(self,"zombie_scream",2.0);return
         if distance<_attack_range(actor) and attack_cooldown>0:
             heading=Vector2.ZERO;route.clear();route_index=0;return
         if distance<_attack_range(actor) and attack_cooldown==0 and spawn_cooldown==0 and manager.line_of_sight(global_position+Vector3.UP,actor.global_position+Vector3.UP):
             attack_time=float(manager.settings.attack_windup);attack_cooldown=float(manager.settings.attack_interval)
-            _animate("Punch" if animator.has_animation("Punch") else "Jump",true)
+            var running: bool=Vector2(velocity.x,velocity.z).length()>2.7 and animator.has_animation("Run_Attack")
+            animator.speed_scale=1;clip=""
+            _animate("Run_Attack" if running else ("Punch" if animator.has_animation("Punch") else "Jump"),true)
+            manager.play_sound(self,"zombie_attack")
             return
         heading=(target-point).normalized()
         if manager.navigation.segment_clear(point,target):route.clear();route_index=0

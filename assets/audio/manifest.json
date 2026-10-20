@@ -284,5 +284,109 @@
     "source_file": "EmptyCity.ogg",
     "sha256": "10cdeb8e7ede29f8afeedaec23f16297752a89aac36c37b06a0262b5190efaad",
     "processing": "Original loopable Ogg retained unchanged."
+  },
+  "zombie_groan_0.wav": {
+    "pack": "moans",
+    "source_file": "darsycho__zombie-moans.ogg",
+    "source_sha256": "49b0bd7a7908f2b3ea61ae93ccf584ab650705d62e8ed6d4c8c9f5b98ad37b05",
+    "sha256": "dccc96306f0c438e3e8d6f3a66c21a94cef5120d561d7df5f02600bbcda44d8d",
+    "duration": 2.71,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; excerpt 0.24-2.95s; "
+  },
+  "zombie_groan_1.wav": {
+    "pack": "moans",
+    "source_file": "darsycho__zombie-moans.ogg",
+    "source_sha256": "49b0bd7a7908f2b3ea61ae93ccf584ab650705d62e8ed6d4c8c9f5b98ad37b05",
+    "sha256": "b8119f6011b2024aa9c4a975f61e836225a075d22b32d8284c484b6c3ea40333",
+    "duration": 2.58,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; excerpt 3.66-6.24s; "
+  },
+  "zombie_groan_2.wav": {
+    "pack": "moans",
+    "source_file": "darsycho__zombie-moans.ogg",
+    "source_sha256": "49b0bd7a7908f2b3ea61ae93ccf584ab650705d62e8ed6d4c8c9f5b98ad37b05",
+    "sha256": "9cc91772b1f64ca81b84a6804b4efc90cfb681f9aa0280f017e9f3174826fa27",
+    "duration": 2.26,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; excerpt 6.63-8.89s; "
+  },
+  "zombie_groan_3.wav": {
+    "pack": "moans",
+    "source_file": "darsycho__zombie-moans.ogg",
+    "source_sha256": "49b0bd7a7908f2b3ea61ae93ccf584ab650705d62e8ed6d4c8c9f5b98ad37b05",
+    "sha256": "29a27dbc311dfe3c41976fa0e6605bffabb89eefea824ce504a9cc401742a115",
+    "duration": 2.97,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; excerpt 11.47-14.44s; "
+  },
+  "zombie_groan_4.wav": {
+    "pack": "noises",
+    "source_file": "zombienoise2.ogg",
+    "source_sha256": "f9e23d6545f64798d29f2b7ac767da6208c1dc43b6d0928dc037fae4bca13b13",
+    "sha256": "9486b67c11de17d7c04f6c257ef788a52143da6e57bf94b6310cbe641ca5bdd8",
+    "duration": 1.555,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "zombie_death_0.wav": {
+    "pack": "moans",
+    "source_file": "darsycho__zombie-moans.ogg",
+    "source_sha256": "49b0bd7a7908f2b3ea61ae93ccf584ab650705d62e8ed6d4c8c9f5b98ad37b05",
+    "sha256": "b8b5a95a4448029fd9d473847cb7706ae6d6057fe0c8ded02c03946556e1c286",
+    "duration": 0.89,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; excerpt 9.3-10.19s; "
+  },
+  "zombie_death_1.wav": {
+    "pack": "moans",
+    "source_file": "darsycho__zombie-moans.ogg",
+    "source_sha256": "49b0bd7a7908f2b3ea61ae93ccf584ab650705d62e8ed6d4c8c9f5b98ad37b05",
+    "sha256": "922ed53ab39374c243e3b42d2d40f92555ab773bc8cc7bc37db9a15576a6dfb7",
+    "duration": 0.79,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; excerpt 10.42-11.21s; "
+  },
+  "zombie_attack.wav": {
+    "pack": "noises",
+    "source_file": "zombienoise3.ogg",
+    "source_sha256": "968b48b14a83a17b387e7373c83d3b9553bf21d2b0e03a67909ead4fc21f38b1",
+    "sha256": "9cfd18018104c5f24934ca0bdd220ac81d77abad13acb860002e6c0648acd762",
+    "duration": 0.507,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "zombie_hit.wav": {
+    "pack": "noises",
+    "source_file": "fastzombie1.ogg",
+    "source_sha256": "21b7fb4bd7c588ad67fafcb1d72bdd65312ff22ae60660d552e7477c569111fe",
+    "sha256": "5efef1d91e98b4b144efc1b3db9d5396756472b8d1600020ca110a11468248ce",
+    "duration": 0.336,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "zombie_scream.wav": {
+    "pack": "noises",
+    "source_file": "zombienoise1.ogg",
+    "source_sha256": "e3105f5259ad8b17bd1134c5a5cee79fc7f2f3662466d348bc05944cb92f16ae",
+    "sha256": "e4d99c9f66280dbbe7ec809659a7ddf47d71ad9aa940bd6870129d7af0f508e7",
+    "duration": 2.073,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "melee_swing_0.wav": {
+    "pack": "swishes",
+    "source_file": "swish-3.wav",
+    "source_sha256": "55b100e2c67fa43dad8510e31e85bbd51a68d5ce84a6e0259e21e19030083e24",
+    "sha256": "e14bedbdc30a1a8b5897c340869c7e6a99380e0db181463e5796fb86abdb77b6",
+    "duration": 0.114,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "melee_swing_1.wav": {
+    "pack": "swishes",
+    "source_file": "swish-7.wav",
+    "source_sha256": "e6de737a34de16afed094d6170d7679149022f149e0a8356d2f029b0e8f4a4d7",
+    "sha256": "a880309b7e9058ed525cad75ce649fddb1384ee6032401ba9b7a96f2efbd267b",
+    "duration": 0.17,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
+  },
+  "roll_whoosh.wav": {
+    "pack": "swishes",
+    "source_file": "swish-11.wav",
+    "source_sha256": "9e81d548d8215fbb36f7a41b5771d4b52c2fd02fbb9b5ff9a4c65118fd88ee4d",
+    "sha256": "5a2589abd9965a3f19a75f3a223fb26af4818c289ee45716a1d232f83e9d5167",
+    "duration": 0.092,
+    "processing": "mono PCM16 44.1kHz; peak -3.1 dB; trim leading silence; short edge fades; "
   }
 }

@@ -31,7 +31,7 @@ func run() -> void:
     camera.global_position=game.player.global_position+Vector3(0,1.5,0)
     var target: Vector3=zombie.body_box.global_position
     camera.look_at(target,Vector3.UP)
-    var guns: Node3D=game.player.weapons;guns.cooldown=0;guns.reload_time=0;guns.rounds[1]=12
+    var guns: Node3D=game.player.weapons;guns.spread_enabled=false;guns.cooldown=0;guns.reload_time=0;guns.rounds[1]=12
     var result: Dictionary=guns.shoot()
     check(not result.is_empty() and result.collider==zombie.body_box,"Actual muzzle hitscan reaches zombie body")
     check(zombie.health==976,"Body hit applies exactly one pistol damage event")

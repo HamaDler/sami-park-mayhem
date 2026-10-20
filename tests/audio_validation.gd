@@ -77,9 +77,14 @@ func run() -> void:
     check(AudioServer.is_bus_mute(AudioServer.get_bus_index("SFX")),"Zero volume fully mutes the effects bus")
     audio.save_preferences();audio.set_volume("Music",.9,false);audio.load_preferences()
     check(is_equal_approx(float(audio.volumes.Music),.22),"Volume settings persist through reload")
+    # Restore the player's real preferences immediately: this file is shared with the game,
+    # and a later timeout must not leave effects muted.
+    for bus: String in initial_volumes:audio.set_volume(bus,float(initial_volumes[bus]),false)
+    audio.save_preferences()
     options.sliders.Music.value=65;options.sliders.SFX.value=85
-    await process_frame;await RenderingServer.frame_post_draw
-    root.get_texture().get_image().save_png(OUT+"/audio-options.png")
+    if DisplayServer.get_name()!="headless":
+        await process_frame;await RenderingServer.frame_post_draw
+        root.get_texture().get_image().save_png(OUT+"/audio-options.png")
     game.hud.set_paused(false);await delay(.1)
     check(not motor.engine.stream_paused,"Resuming restores vehicle playback")
     cart.set_control_enabled(false);motor._physics_process(2)
