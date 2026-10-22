@@ -16,15 +16,15 @@ func initialize(view: Camera3D) -> void:
     camera=view
     top_level=true
     beam=SpotLight3D.new();beam.name="Beam"
-    beam.light_color=Color(1.0,.94,.84);beam.light_energy=4.2;beam.light_indirect_energy=0
-    beam.spot_range=42;beam.spot_angle=17;beam.spot_angle_attenuation=.75;beam.spot_attenuation=.9
+    beam.light_color=Color(1.0,.9,.64);beam.light_energy=1.45;beam.light_indirect_energy=0
+    beam.spot_range=42;beam.spot_angle=17;beam.spot_angle_attenuation=.4;beam.spot_attenuation=.9
     beam.shadow_enabled=true;beam.shadow_bias=.04;beam.shadow_normal_bias=1.2
     # Your own body and weapon never block the beam or show up blown out in it.
     beam.light_cull_mask=ALL_LAYERS&~VIEWMODEL_LAYER
     beam.shadow_caster_mask=ALL_LAYERS&~(BODY_LAYER|VIEWMODEL_LAYER)
     add_child(beam)
     spill=SpotLight3D.new();spill.name="Spill"
-    spill.light_color=beam.light_color;spill.light_energy=.45;spill.light_indirect_energy=0
+    spill.light_color=beam.light_color;spill.light_energy=.22;spill.light_indirect_energy=0
     spill.spot_range=16;spill.spot_angle=40;spill.spot_angle_attenuation=1.6
     spill.light_cull_mask=beam.light_cull_mask
     add_child(spill)

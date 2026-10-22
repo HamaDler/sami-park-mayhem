@@ -263,8 +263,8 @@ func _build_lights() -> void:
     # Just ahead of the bumper upgrade so cart parts never shadow the beam.
     headlight_beam.position = Vector3(0,0.68,-1.58)
     headlight_beam.rotation.x = deg_to_rad(-6.0)
-    headlight_beam.light_color = Color(1.0,0.93,0.8)
-    headlight_beam.light_energy = 5.0
+    headlight_beam.light_color = Color(1.0,0.88,0.6)
+    headlight_beam.light_energy = 1.5
     headlight_beam.light_indirect_energy = 0.0
     headlight_beam.spot_range = 60.0
     headlight_beam.spot_angle = 30.0

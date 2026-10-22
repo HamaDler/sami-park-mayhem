@@ -37,3 +37,10 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 anti_aliasing/quality/msaa_3d=2
 environment/defaults/default_clear_color=Color(0.02, 0.025, 0.045, 1)
+
+[shader_globals]
+
+comic_amount={
+"type": "float",
+"value": 1.0
+}

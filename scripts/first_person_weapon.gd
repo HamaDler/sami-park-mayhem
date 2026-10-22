@@ -27,7 +27,7 @@ func _ready() -> void:
     # light stands in for the light spilling back onto it.
     spill=OmniLight3D.new();spill.name="FlashlightSpill"
     spill.light_cull_mask=VIEWMODEL_LAYER;spill.omni_range=1.4;spill.light_energy=0
-    spill.light_color=Color(1.0,.94,.84);spill.position=Vector3(.22,-.05,.05)
+    spill.light_color=Color(1.0,.87,.52);spill.position=Vector3(.22,-.05,.05)
     add_child(spill)
     visible=false
 func player() -> CharacterBody3D:

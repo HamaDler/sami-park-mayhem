@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_disabled, depth_draw_never;
+#include "res://assets/shaders/comic_light.gdshaderinc"
 uniform float clock=0.0;
 uniform float lifetime=65.0;
 varying vec4 tread_data;

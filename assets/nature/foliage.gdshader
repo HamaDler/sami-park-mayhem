@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_disabled;
+#include "res://assets/shaders/comic_light.gdshaderinc"
 uniform sampler2D leaf_texture : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec4 tint : source_color = vec4(0.55, 0.72, 0.46, 1.0);
 uniform float wind_strength = 0.065;

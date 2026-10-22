@@ -233,7 +233,7 @@ func _furniture() -> void:
             var lamp := OmniLight3D.new()
             lamp.position = Vector3(0,3.7,0)
             lamp.light_color = Color(1.0,0.78,0.48)
-            lamp.light_energy = 1.6
+            lamp.light_energy = 1.1
             lamp.omni_range = 15.0
             lamp.omni_attenuation = 1.3
             lamp.distance_fade_enabled = true

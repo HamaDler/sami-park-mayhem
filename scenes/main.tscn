@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/park.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/cart.tscn" id="3"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/crowd.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/survival.tscn" id="8"]
 [ext_resource type="Shader" path="res://assets/night_sky.gdshader" id="9"]
+[ext_resource type="Script" path="res://scripts/comic_style.gd" id="10"]
 [sub_resource type="ShaderMaterial" id="SkyMaterial"]
 shader=ExtResource("9")
 [sub_resource type="Sky" id="Sky"]
@@ -18,8 +19,8 @@ background_mode=2
 sky=SubResource("Sky")
 background_color=Color(0.02,0.025,0.045,1)
 ambient_light_source=2
-ambient_light_color=Color(0.42,0.5,0.74,1)
-ambient_light_energy=0.1
+ambient_light_color=Color(0.42,0.52,0.86,1)
+ambient_light_energy=0.26
 tonemap_mode=2
 glow_enabled=true
 glow_intensity=0.7
@@ -27,8 +28,8 @@ glow_bloom=0.02
 glow_blend_mode=1
 glow_hdr_threshold=0.9
 fog_enabled=true
-fog_light_color=Color(0.04,0.05,0.08,1)
-fog_density=0.0065
+fog_light_color=Color(0.05,0.075,0.15,1)
+fog_density=0.0045
 fog_sky_affect=0.0
 [node name="SamiParkGame" type="Node3D"]
 script=ExtResource("1")
@@ -36,8 +37,8 @@ script=ExtResource("1")
 environment=SubResource("Environment")
 [node name="Moon" type="DirectionalLight3D" parent="."]
 rotation_degrees=Vector3(-38,148,0)
-light_color=Color(0.62,0.72,1,1)
-light_energy=0.2
+light_color=Color(0.56,0.68,1,1)
+light_energy=0.4
 [node name="SamiPark" parent="." instance=ExtResource("2")]
 [node name="GolfCart" parent="." instance=ExtResource("3")]
 [node name="WalkPlayer" parent="." instance=ExtResource("6")]
@@ -46,3 +47,5 @@ light_energy=0.2
 
 [node name="Crowd" parent="." instance=ExtResource("7")]
 [node name="Survival" parent="." instance=ExtResource("8")]
+[node name="ComicStyle" type="Node" parent="."]
+script=ExtResource("10")

@@ -36,7 +36,17 @@ The park is played at night under a moon and stars. Lamp posts along the paths l
 
 The camera is first person. On foot you see your gun, which follows aiming, sprinting, reloading, recoil and mouse sway, and pulls back near walls. Your body still exists for shadows. In the cart you sit in the driver's seat: look down to see your hands on the turning steering wheel, look around with the mouse (it recenters on the road while driving), and feel road rumble and impacts. Setting `first_person=false` in `data/camera_settings.tres` restores the old chase camera.
 
-Lighting lives in `scenes/main.tscn` (moon, ambient, fog, glow) and `assets/night_sky.gdshader` (sky, stars, moon disc). Moon shadows are off on purpose: in the Compatibility renderer, a shadowed moon plus a shadowed flashlight/headlight makes the overlapping path meshes flicker. `tests/night_first_person_capture.gd` renders reference screenshots (run without `--headless`).
+Lighting lives in `scenes/main.tscn` (moon, ambient, fog, glow) and `assets/night_sky.gdshader` (sky, stars, clouds, moon). Moon shadows are off on purpose: in the Compatibility renderer, a shadowed moon plus a shadowed flashlight/headlight makes the overlapping path meshes flicker. `tests/night_first_person_capture.gd` renders reference screenshots (run without `--headless`).
+
+## Comic art direction
+
+The game is drawn like a graphic novel: flat banded shading, black ink outlines, ink hatching and speckle in the shadows, a navy-and-warm-yellow palette, a sky with inked clouds and a cratered moon, and zombies with glowing yellow eyes.
+
+- **Toon lighting:** `assets/shaders/comic_light.gdshaderinc` snaps each light into three flat bands (the unlit band is the navy ambient). Custom shaders (grass, foliage, water, nets, tire trails, crowd) include it directly.
+- **Material swap:** the `ComicStyle` node in `scenes/main.tscn` (`scripts/comic_style.gd`) replaces every lit `StandardMaterial3D` with a toon material built from `assets/shaders/comic_toon.gdshaderinc`, keeping its colour, texture, vertex colours, UVs and cutout. Anything spawned later (zombies, streamed trees, cart upgrades) is converted as it appears. Glowing, transparent and unshaded materials keep their original look. The one exception is the pre-lit distant tree billboards, which are relit so they match the trees up close.
+- **Ink pass:** `assets/shaders/comic_post.gdshader` runs on a quad attached to the camera. It draws outlines from depth jumps, surface creases and strong colour edges, and adds hatching and speckle that stay fixed to the world as you move. Labels and particles draw on top of it.
+- **Glowing eyes:** `scripts/zombie.gd` places two glowing eyes on the front of each zombie's head hitbox, so new zombie models get eyes automatically once their hitboxes are rebuilt with `tools/build_zombie_hitboxes.py`.
+- **Tuning:** `ComicStyle` exposes `enabled`, `outline_width` and `hatch_strength`. The ink pass's other settings (line thresholds and fade distances, hatch density, saturation) are uniforms at the top of `comic_post.gdshader`. Turning `enabled` off switches back to smooth lighting without outlines.
 
 ## Controls
 

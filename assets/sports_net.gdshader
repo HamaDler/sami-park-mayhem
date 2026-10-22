@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_disabled;
+#include "res://assets/shaders/comic_light.gdshaderinc"
 void fragment(){
     vec2 cell=fract(UV*vec2(55.0,14.0));
     float wire=max(step(cell.x,.07),step(cell.y,.07));

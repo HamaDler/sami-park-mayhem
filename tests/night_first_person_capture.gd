@@ -24,6 +24,8 @@ func capture() -> void:
     var player: CharacterBody3D=game.player
     var rig: Node3D=game.camera_rig
     var hud: Node=game.hud
+    # Real mouse movement over the window would steer the view mid-capture.
+    rig.set_process_unhandled_input(false)
     player.weapons.grant_weapon(2,0);player.weapons.grant_weapon(3,0)
     player.weapons.select_weapon(1)
     await create_timer(1.0).timeout
@@ -40,9 +42,14 @@ func capture() -> void:
     look(0,-.05);await frames(2)
     var ahead: Vector3=player.global_position-rig.global_basis.z*8
     zombie.activate(Vector2(ahead.x,ahead.z),999,manager.type_stats(1,manager.types.keys()[0]))
-    zombie.look_at(Vector3(player.global_position.x,zombie.global_position.y,player.global_position.z),Vector3.UP,true)
+    zombie.look_at(Vector3(player.global_position.x,zombie.global_position.y,player.global_position.z),Vector3.UP)
     await shot("04b-zombie-flashlight-on")
     rig.flashlight.set_on(false);await shot("04c-zombie-flashlight-off")
+    rig.flashlight.set_on(true)
+    var close: Vector3=player.global_position-rig.global_basis.z*3.2
+    zombie.global_position=Vector3(close.x,zombie.global_position.y,close.z)
+    zombie.look_at(Vector3(player.global_position.x,zombie.global_position.y,player.global_position.z),Vector3.UP)
+    await shot("04d-zombie-close")
     rig.flashlight.set_on(true);zombie.hide()
     player.weapons.select_weapon(2);await create_timer(.4).timeout
     look(0,-.05);await shot("05-rifle-hip")
