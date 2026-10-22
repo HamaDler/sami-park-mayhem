@@ -19,8 +19,10 @@ const BANNER_SECONDS: float=3.2
 var ending: Control
 var summary: Label
 var workshop: Control
+var sound_words: Control
 func _ready() -> void:
     mouse_filter=Control.MOUSE_FILTER_IGNORE;process_mode=Node.PROCESS_MODE_ALWAYS
+    sound_words=Control.new();sound_words.name="ComicSoundWords";sound_words.set_script(load("res://scripts/comic_sfx.gd"));add_child(sound_words)
     workshop=Control.new();workshop.set_script(load("res://scripts/workshop_menu.gd"));add_child(workshop)
     ending=Control.new();ending.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(ending)
     var shade:=ColorRect.new();shade.color=Color(.015,.02,.025,.92);shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);ending.add_child(shade)
@@ -42,6 +44,7 @@ func _set_survival(session: Node3D) -> void:
     shown_health=float(session.health);chip_health=shown_health
     session.hit_feedback.connect(_on_hit_feedback)
     session.player_hit_from.connect(func(source: Vector3):damage_marks.append({"source":source,"time":1.3}))
+    sound_words.bind(session)
 func _on_hit_feedback(kind: String, points: int, label: String) -> void:
     hit_kind=kind;hit_time=.28
     GameUI.play_ui({"body":"hitmarker","head":"hitmarker_head"}.get(kind,"kill_confirm"))
@@ -81,8 +84,8 @@ func _draw() -> void:
     if not survival:return
     var s:=survival
     var p:=Vector2(size.x-355,25)
-    draw_style_box(GameUI.style(Color(.02,.03,.04,.9)),Rect2(p,Vector2(325,172)))
-    draw_line(p,p+Vector2(325,0),GameUI.RED,4,true)
+    draw_style_box(GameUI.panel_style(Color(.04,.05,.08,.94)),Rect2(p,Vector2(325,172)))
+    draw_rect(Rect2(p+Vector2(3,3),Vector2(319,5)),GameUI.RED)
     _caption(p+Vector2(17,36),"WAVE",18,GameUI.MUTED)
     _text(p+Vector2(88,44),"%02d" % maxi(1,s.wave.number),42,GameUI.WHITE,true)
     var status: String="%d LEFT" % s.wave.remaining() if s.wave.running else "NEXT IN %dS" % ceili(s.wave.preparation)
@@ -96,8 +99,8 @@ func _draw() -> void:
     if s.missions.active:
         var mission: Node3D=s.missions
         var origin:=Vector2(30,156)
-        draw_style_box(GameUI.style(Color(.02,.03,.04,.9)),Rect2(origin,Vector2(350,128)))
-        draw_line(origin,origin+Vector2(350,0),Color("64e2f0"),3,true)
+        draw_style_box(GameUI.panel_style(Color(.04,.05,.08,.94)),Rect2(origin,Vector2(350,128)))
+        draw_rect(Rect2(origin+Vector2(3,3),Vector2(344,5)),Color("64e2f0"))
         _text(origin+Vector2(13,26),"SUPPLIES  /  "+mission.location_name,GameUI.SIZE_SUBHEADING,Color("64e2f0"),true)
         _text(origin+Vector2(13,51),mission.status,GameUI.SIZE_BODY,GameUI.WHITE)
         var distance: float=s.game.get_active_actor().global_position.distance_to(Vector3(mission.position_2d.x,0,mission.position_2d.y))
@@ -139,7 +142,7 @@ func _draw() -> void:
 func _draw_vitals(s: Node3D) -> void:
     var maximum: float=float(s.config.player.max_health)
     var bottom:=Vector2(size.x*.5-145,size.y-137)
-    draw_rect(Rect2(bottom,Vector2(290,33)),Color(.02,.03,.04,.85))
+    draw_style_box(GameUI.style(Color(.04,.05,.08,.92),0,Vector2(3,4)),Rect2(bottom,Vector2(290,33)))
     var inner:=Vector2(282,25)
     draw_rect(Rect2(bottom+Vector2(4,4),Vector2(inner.x*clampf(chip_health/maximum,0,1),inner.y)),Color(.95,.85,.75,.75))
     draw_rect(Rect2(bottom+Vector2(4,4),Vector2(inner.x*clampf(shown_health/maximum,0,1),inner.y)),GameUI.RED if s.health<35 else Color("76ba79"))

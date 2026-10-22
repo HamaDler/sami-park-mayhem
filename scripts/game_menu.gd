@@ -26,7 +26,7 @@ func _ready() -> void:
     GameUI.label(header,"PAUSED",Vector2(24,9),GameUI.SIZE_TITLE,GameUI.INK,true)
     header_context=GameUI.label(header,"SAMI PARK  /  FREE DRIVE",Vector2(432,26),GameUI.SIZE_LABEL+1,GameUI.INK,true)
     header_context.add_theme_font_override("font",GameUI.caption())
-    _plate(frame,Vector2(0,70),Vector2(760,448),Color(.05,.07,.11,.96))
+    _plate(frame,Vector2(0,70),Vector2(760,448),Color(.05,.07,.11,.96)).halftone=true
     for index in 4:
         var index_copy:=index
         var button:=GameUI.button(frame,["DRIVE","OPTIONS","AUDIO","CONTROLS"][index],Vector2(18,90+index*58),Vector2(168,48),func():show_tab(index_copy))

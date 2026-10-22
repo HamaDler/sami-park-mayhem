@@ -40,6 +40,7 @@ func _ready() -> void:
         court_sign.billboard=BaseMaterial3D.BILLBOARD_ENABLED
         court_sign.modulate=Color("fff3cb")
         GameUI.style_sign(court_sign,12)
+        court_sign.shaded=true;GameUI.close_up(court_sign,35)
         parcel.add_child(court_sign)
     print("SPORTS: basketball, volleyball, three padel courts at mapped southwest footprints")
 func is_inside(point: Vector2) -> bool:

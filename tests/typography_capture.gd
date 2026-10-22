@@ -40,6 +40,16 @@ func capture() -> void:
     survival.process_mode=Node.PROCESS_MODE_INHERIT;await frames(1);survival.process_mode=Node.PROCESS_MODE_DISABLED
     await shot("01-hud-on-foot")
     overlay.banner_time=0;overlay.popups.clear()
+    # Comic sound-effect lettering: a kill burst, a hit, gunfire beside the gun and a bite.
+    var words: Control=overlay.sound_words
+    var ahead: Vector3=rig.camera.global_position-rig.camera.global_basis.z*7
+    words.say("kill",ahead+rig.camera.global_basis.x*-1.4)
+    words.say("headhit",ahead+rig.camera.global_basis.x*1.8+Vector3.UP*.4)
+    words.say("pistol",rig.camera.unproject_position(rig.viewmodel.muzzle_position()),Vector2(60,-55))
+    words.say("hurt",Vector2.ZERO,Vector2(-.32,.05))
+    for word in words.words:word.age=.16
+    await shot("04-sound-words")
+    words.words.clear()
     hud.show_toast("CACHE SECURED  /  +1500 IQD  /  FULL AMMO");hud.tutorial_time=30
     await shot("02-hud-toast")
     # Driving HUD.

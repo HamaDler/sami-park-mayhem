@@ -295,8 +295,8 @@ func _set_type(kind: String) -> void:
     if kind=="walker":return
     var color:=Color(manager.types[kind].color)
     var material:=ParkGeometry.material(color,.65)
-    var label:=Label3D.new();label.text=manager.types[kind].name;label.modulate=color;GameUI.style_sign(label,10);label.font_size=32;label.pixel_size=.005
-    label.position.y=2.05;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.visibility_range_end=45;type_visual.add_child(label)
+    var label:=Label3D.new();label.text=manager.types[kind].name;label.modulate=color;GameUI.style_sign(label,10);GameUI.close_up(label,12);label.font_size=32;label.pixel_size=.005
+    label.position.y=2.05;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;type_visual.add_child(label)
     if kind=="armored":
         ParkGeometry.box(type_visual,Vector3(0,.9,0),Vector3(.68,.5,.45),material)
         # Use the imported head's local units so the helmet follows its animation and scale.

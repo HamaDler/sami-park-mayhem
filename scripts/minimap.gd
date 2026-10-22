@@ -28,8 +28,8 @@ func mapped(points: PackedVector2Array) -> PackedVector2Array:
     for point in points:output.append(project(point))
     return output
 func _draw() -> void:
-    draw_colored_polygon(PackedVector2Array([Vector2.ZERO,Vector2(size.x-12,0),Vector2(size.x,12),size,Vector2(12,size.y),Vector2(0,size.y-12)]),Color(.025,.04,.065,.86))
-    draw_line(Vector2(0,0),Vector2(size.x-12,0),GameUI.LIME,3,true)
+    GameUI.draw_plate(self,Rect2(Vector2.ZERO,size),Color(.04,.05,.08,.92),12,false)
+    draw_rect(Rect2(Vector2(3,3),Vector2(size.x-18,4)),GameUI.LIME)
     draw_string(GameUI.display(),Vector2(14,25),"SAMI PARK",HORIZONTAL_ALIGNMENT_LEFT,-1,GameUI.SIZE_LABEL,GameUI.WHITE)
     draw_string(GameUI.display(),Vector2(size.x-41,25),"M",HORIZONTAL_ALIGNMENT_LEFT,-1,GameUI.SIZE_LABEL,GameUI.LIME)
     if park==null:return

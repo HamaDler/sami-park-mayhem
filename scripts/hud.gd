@@ -79,13 +79,14 @@ func _ready() -> void:
     var credit:=GameUI.label(root,"\u00a9 OpenStreetMap contributors",Vector2.ZERO,GameUI.SIZE_MICRO,GameUI.MUTED,false,3)
     credit.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
     credit.offset_left=-110;credit.offset_top=-21;credit.offset_right=180;credit.offset_bottom=-3
-    toast_plate=_plate(root,Vector2.ZERO,Vector2(500,51),Color(.04,.06,.09,.90))
+    # Messages are speech bubbles: the character talking (scripts/comic_bubble.gd).
+    toast_plate=Control.new();toast_plate.set_script(load("res://scripts/comic_bubble.gd"));root.add_child(toast_plate)
     toast_plate.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-    toast_plate.offset_left=-250;toast_plate.offset_top=20;toast_plate.offset_right=250;toast_plate.offset_bottom=66
-    toast_plate.accent=GameUI.LIME
-    toast_label=GameUI.label(toast_plate,"",Vector2(15,4),GameUI.SIZE_SUBHEADING-1,GameUI.WHITE,true)
-    toast_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-    toast_label.size=Vector2(470,38);toast_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    toast_plate.offset_top=18;toast_plate.offset_bottom=18+46+toast_plate.tail_height
+    toast_label=GameUI.label(toast_plate,"",Vector2(15,4),GameUI.SIZE_SUBHEADING-1,GameUI.INK,true)
+    toast_label.add_theme_color_override("font_shadow_color",Color(0,0,0,0))
+    toast_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;toast_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    _fit_toast("")
     pause_overlay=load("res://scenes/game_menu.tscn").instantiate();root.add_child(pause_overlay)
     pause_overlay.resume_requested.connect(func():set_paused(false))
     pause_overlay.recover_requested.connect(func():get_parent().recover_active();set_paused(false))
@@ -104,8 +105,14 @@ func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
     show_toast("ENGLISH DOOR   /   FREE DRIVE")
 func show_toast(message: String) -> void:
     toast_label.text=message.to_upper()
+    _fit_toast(toast_label.text)
     toast_time=3.5
     toast_plate.show()
+# The bubble hugs its text instead of a fixed-width bar.
+func _fit_toast(text: String) -> void:
+    var width: float=clampf(GameUI.text_width(GameUI.display(),text,GameUI.SIZE_SUBHEADING-1)+64,240,820)
+    toast_plate.offset_left=-width*.5;toast_plate.offset_right=width*.5
+    toast_label.size=Vector2(width-30,38)
 func set_paused(value: bool) -> void:
     if get_parent().get("survival") and get_parent().survival.over:return
     if value!=get_tree().paused:GameUI.play_ui("ui_open" if value else "ui_close")

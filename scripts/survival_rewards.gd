@@ -16,7 +16,7 @@ func spawn_pickup(point: Vector3, kind: int) -> void:
     var material:=ParkGeometry.material(color);material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
     var item:=ParkGeometry.box(node,Vector3(0,1,0),Vector3(.6,.6,.6),material);item.rotation.z=PI*.25
     var ring:=MeshInstance3D.new();var torus:=TorusMesh.new();torus.inner_radius=.6;torus.outer_radius=.68;ring.mesh=torus;ring.material_override=material;ring.position.y=.12;node.add_child(ring)
-    var label:=Label3D.new();label.text=["INFINITE AMMO","DOUBLE DINARS","MAX AMMO"][kind];GameUI.style_sign(label,12);label.font_size=38;label.pixel_size=.009;label.position.y=1.8;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;node.add_child(label)
+    var label:=Label3D.new();label.text=["INFINITE AMMO","DOUBLE DINARS","MAX AMMO"][kind];GameUI.style_sign(label,12);GameUI.close_up(label,18);label.font_size=38;label.pixel_size=.009;label.position.y=1.8;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;node.add_child(label)
     pickups.append({"node":node,"kind":kind,"life":float(survival.config.powerups.pickup_lifetime),"phase":0.0})
 func collect(kind: int) -> void:
     GameUI.play_ui("pickup")

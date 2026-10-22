@@ -259,6 +259,7 @@ func _entrance() -> void:
     label.position = Vector3(0,4.2,4.68)
     label.modulate = Color("fff2cf")
     GameUI.style_sign(label,16)
+    label.shaded=true
     gate.add_child(label)
     var board := Node3D.new()
     board.position = Vector3(7,0,-1)
@@ -271,6 +272,7 @@ func _entrance() -> void:
     welcome.pixel_size = 0.002
     welcome.position = Vector3(0,1.3,-0.1)
     GameUI.style_sign(welcome,8)
+    welcome.shaded=true
     welcome.rotation.y = PI
     board.add_child(welcome)
 
