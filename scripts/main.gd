@@ -29,7 +29,7 @@ func get_active_actor() -> CharacterBody3D:
     return player if is_instance_valid(player) else get_node_or_null("GolfCart")
 func is_driving() -> bool:return is_instance_valid(active_vehicle)
 func _setup_inputs() -> void:
-    var bindings: Dictionary={"accelerate":[KEY_W,KEY_UP],"reverse":[KEY_S,KEY_DOWN],"left":[KEY_A,KEY_LEFT],"right":[KEY_D,KEY_RIGHT],"brake":[KEY_SPACE],"jump":[KEY_SPACE],"recover":[KEY_R],"pause":[KEY_ESCAPE],"map_toggle":[KEY_M],"interact":[KEY_F],"sprint":[KEY_SHIFT],"weapon_1":[KEY_1],"weapon_2":[KEY_2],"weapon_3":[KEY_3],"melee":[KEY_V],"roll":[KEY_C]}
+    var bindings: Dictionary={"accelerate":[KEY_W,KEY_UP],"reverse":[KEY_S,KEY_DOWN],"left":[KEY_A,KEY_LEFT],"right":[KEY_D,KEY_RIGHT],"brake":[KEY_SPACE],"jump":[KEY_SPACE],"recover":[KEY_R],"pause":[KEY_ESCAPE],"map_toggle":[KEY_M],"interact":[KEY_F],"sprint":[KEY_SHIFT],"weapon_1":[KEY_1],"weapon_2":[KEY_2],"weapon_3":[KEY_3],"melee":[KEY_V],"roll":[KEY_C],"flashlight":[KEY_T]}
     for action: String in bindings:
         if not InputMap.has_action(action):InputMap.add_action(action)
         for key in bindings[action]:
@@ -42,6 +42,8 @@ func _setup_inputs() -> void:
 func _unhandled_input(event: InputEvent) -> void:
     if player.movement_locked:return
     if get_tree().paused or (survival and survival.over) or (event is InputEventKey and event.echo):return
+    if event.is_action_pressed("flashlight"):
+        toggle_light();get_viewport().set_input_as_handled();return
     if event.is_action_pressed("interact"):
         if is_driving():exit_vehicle()
         else:
@@ -51,6 +53,12 @@ func _unhandled_input(event: InputEvent) -> void:
             elif access:enter_vehicle(access)
             else:hud.show_toast("MOVE CLOSER TO A VEHICLE")
         get_viewport().set_input_as_handled()
+# T: the flashlight on foot, the headlights while driving.
+func toggle_light() -> void:
+    if is_driving():
+        if active_vehicle.vehicle.has_method("toggle_headlights"):
+            hud.show_toast("HEADLIGHTS ON" if active_vehicle.vehicle.toggle_headlights() else "HEADLIGHTS OFF")
+    elif camera_rig.first_person:camera_rig.flashlight.toggle()
 func nearest_vehicle() -> Node3D:
     var best: Node3D=null
     var distance: float=player.settings.interaction_distance

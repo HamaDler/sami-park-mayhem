@@ -46,13 +46,13 @@ func _ready() -> void:
     density_label=GameUI.label(views[1],"HIGH",Vector2(370,74),20,GameUI.LIME,true)
     high_button=GameUI.button(views[1],"HIGH",Vector2(264,128),Vector2(110,43),func():density_requested.emit(1.0))
     low_button=GameUI.button(views[1],"LOW",Vector2(386,128),Vector2(110,43),func():density_requested.emit(.45))
-    _row(views[1],"CAMERA ZOOM",198,GameUI.PANEL)
-    GameUI.label(views[1],"SCROLL",Vector2(345,210),20,GameUI.LIME,true)
-    GameUI.label(views[1],"CART 2.8 - 18 m   /   ON FOOT 2.2 - 7 m",Vector2(12,258),19,GameUI.MUTED)
+    _row(views[1],"CAMERA",198,GameUI.PANEL)
+    GameUI.label(views[1],"FIRST PERSON",Vector2(330,210),20,GameUI.LIME,true)
+    GameUI.label(views[1],"MOUSE LOOKS AROUND ON FOOT AND IN THE CART",Vector2(12,258),19,GameUI.MUTED)
     GameUI.label(views[1],"Lower detail reduces trees and close grass.",Vector2(12,318),17,GameUI.MUTED)
     GameUI.label(views[3],"KEYBOARD / MOUSE",Vector2.ZERO,29,GameUI.WHITE,true)
-    var control_names: Array[String]=["MOVE / DRIVE","LOOK / STEER","ENTER / EXIT VEHICLE","JUMP / HANDBRAKE","WEAPON SLOTS","AIM / FIRE","RELOAD / RECOVER","WORLD MAP"]
-    var bindings: Array[String]=["WASD / ARROWS","MOUSE / A + D","F","SPACE   |   SHIFT RUN","1 PISTOL / 2 RIFLE / 3 SNIPER","RIGHT / LEFT MOUSE","R","M"]
+    var control_names: Array[String]=["MOVE / DRIVE","LOOK / STEER","ENTER / EXIT VEHICLE","JUMP / HANDBRAKE","WEAPON SLOTS","AIM / FIRE","RELOAD / RECOVER","WORLD MAP","FLASHLIGHT / LIGHTS"]
+    var bindings: Array[String]=["WASD / ARROWS","MOUSE / A + D","F","SPACE   |   SHIFT RUN","1 PISTOL / 2 RIFLE / 3 SNIPER","RIGHT / LEFT MOUSE","R","M","T"]
     for index in control_names.size():
         var y:=58+index*40
         _row(views[3],control_names[index],y,GameUI.PANEL if index%2==0 else Color("141c28"),36)

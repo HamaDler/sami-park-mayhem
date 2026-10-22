@@ -67,7 +67,7 @@ func ammo_full() -> bool:
 func set_enabled(value: bool) -> void:
     enabled=value;aiming=false;reload_time=0;cooldown=.2;suppress_until_release=true;bloom=0
     if camera_rig:camera_rig.aiming=false;camera_rig.sniper_scope=false
-    if player:player.avatar.set_weapon(selected_slot);player.avatar.set_first_person_view(false)
+    if player:player.avatar.set_weapon(selected_slot);player.avatar.set_first_person_view(camera_rig!=null and camera_rig.first_person)
 func select_weapon(slot: int) -> void:
     if not enabled or slot<1 or slot>3 or not unlocked[slot]:return
     if slot!=selected_slot:GameUI.play_ui("weapon_equip");raise_time=RAISE_SECONDS
@@ -105,7 +105,7 @@ func _physics_process(delta: float) -> void:
     bloom=move_toward(bloom,0,BLOOM_RECOVERY*delta)
     aiming=Input.is_action_pressed("aim") and not busy
     camera_rig.aiming=aiming;camera_rig.sniper_scope=aiming and selected_slot==3
-    player.avatar.set_first_person_view(camera_rig.sniper_scope or camera_rig.arm.spring_length<1.1)
+    player.avatar.set_first_person_view(camera_rig.first_person or camera_rig.sniper_scope or camera_rig.arm.spring_length<1.1)
     player.avatar.weapon_raise=raise_time/RAISE_SECONDS
     player.avatar.reload_progress=reload_ratio()
     if reload_time>0:
@@ -147,12 +147,18 @@ func shoot() -> Dictionary:
     var aim_hit:=get_world_3d().direct_space_state.intersect_ray(query)
     if not aim_hit.is_empty():target=aim_hit.position
     var muzzle: Vector3=player.avatar.get_weapon().get_node("Muzzle").global_position
-    query.from=muzzle;query.to=target+(target-muzzle).normalized()*.04
-    var hit:=get_world_3d().direct_space_state.intersect_ray(query)
+    var hit: Dictionary
+    if camera_rig.first_person:
+        # First person: the shot is the eye ray; the tracer starts at the visible gun.
+        hit=aim_hit
+        if camera_rig.viewmodel.visible:muzzle=camera_rig.viewmodel.muzzle_position()
+    else:
+        query.from=muzzle;query.to=target+(target-muzzle).normalized()*.04
+        hit=get_world_3d().direct_space_state.intersect_ray(query)
     if not hit.is_empty():
         target=hit.position
         var collider: Object=hit.collider
-        hit.direction=(target-muzzle).normalized()
+        hit.direction=(target-(origin if camera_rig.first_person else muzzle)).normalized()
         if collider.has_method("receive_hit"):collider.call("receive_hit",float(definition.damage),target,hit.normal)
     if not infinite_ammo:rounds[selected_slot]=int(rounds[selected_slot])-1
     cooldown=definition.interval;shot_count+=1

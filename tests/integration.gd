@@ -1,4 +1,5 @@
 extends SceneTree
+var chase_settings: Resource
 var failures: Array[String] = []
 var checks: int = 0
 var game: Node3D
@@ -22,6 +23,8 @@ func reset() -> void:
     cart.steer=0
     await frames(5)
 func run() -> void:
+    # These checks cover the chase camera (orbit, spring arm); first person is covered in player_safety_validation.
+    chase_settings=load("res://data/camera_settings.tres");chase_settings.first_person=false
     game=load("res://scenes/main.tscn").instantiate()
     root.add_child(game)
     current_scene=game

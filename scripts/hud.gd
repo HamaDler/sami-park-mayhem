@@ -41,12 +41,14 @@ func _ready() -> void:
     GameUI.label(driving_hints,"DRIVE",Vector2(74,3),16)
     GameUI.keycap(driving_hints,"SPACE",Vector2(147,0),67)
     GameUI.label(driving_hints,"BRAKE / DRIFT",Vector2(226,3),16)
+    GameUI.keycap(driving_hints,"T",Vector2(372,0),32);GameUI.label(driving_hints,"HEADLIGHTS",Vector2(416,3),16)
     foot_hints=Control.new();foot_hints.position=Vector2(32,105);root.add_child(foot_hints);foot_hints.hide()
     GameUI.keycap(foot_hints,"WASD",Vector2.ZERO,62);GameUI.label(foot_hints,"MOVE",Vector2(74,3),16)
     GameUI.keycap(foot_hints,"SPACE",Vector2(147,0),67);GameUI.label(foot_hints,"JUMP",Vector2(226,3),16)
     GameUI.keycap(foot_hints,"SHIFT",Vector2(300,0),67);GameUI.label(foot_hints,"SPRINT",Vector2(379,3),16)
     GameUI.keycap(foot_hints,"C",Vector2(450,0),32);GameUI.label(foot_hints,"ROLL",Vector2(494,3),16)
     GameUI.keycap(foot_hints,"V",Vector2(548,0),32);GameUI.label(foot_hints,"MELEE",Vector2(592,3),16)
+    GameUI.keycap(foot_hints,"T",Vector2(664,0),32);GameUI.label(foot_hints,"FLASHLIGHT",Vector2(708,3),16)
     gauge=load("res://scenes/speedometer.tscn").instantiate();root.add_child(gauge)
     gauge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
     gauge.offset_left=-308;gauge.offset_top=-290;gauge.offset_right=-18;gauge.offset_bottom=-30
@@ -185,7 +187,10 @@ func set_context(person: CharacterBody3D, in_vehicle: bool) -> void:
     tutorial_time=0
     _restore_mouse();_suppress_fire()
 func _restore_mouse() -> void:
-    Input.mouse_mode=Input.MOUSE_MODE_CAPTURED if not driving and not get_tree().paused else Input.MOUSE_MODE_VISIBLE
+    # First person looks around with the mouse in the cart too.
+    var rig: Node=get_parent().get_node_or_null("ChaseCamera")
+    var mouse_look: bool=not driving or (rig!=null and rig.first_person)
+    Input.mouse_mode=Input.MOUSE_MODE_CAPTURED if mouse_look and not get_tree().paused else Input.MOUSE_MODE_VISIBLE
 func _suppress_fire() -> void:
     var player: Node=get_parent().get_node_or_null("WalkPlayer")
     if player and is_instance_valid(player.weapons):player.weapons.suppress_until_release=true

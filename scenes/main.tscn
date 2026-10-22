@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/park.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/cart.tscn" id="3"]
@@ -7,35 +7,37 @@
 [ext_resource type="PackedScene" path="res://scenes/walk_player.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/crowd.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/survival.tscn" id="8"]
-[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
-sky_top_color=Color(0.28,0.49,0.64,1)
-sky_horizon_color=Color(0.73,0.81,0.78,1)
-ground_bottom_color=Color(0.34,0.40,0.30,1)
-ground_horizon_color=Color(0.73,0.81,0.78,1)
-sun_angle_max=8.0
+[ext_resource type="Shader" path="res://assets/night_sky.gdshader" id="9"]
+[sub_resource type="ShaderMaterial" id="SkyMaterial"]
+shader=ExtResource("9")
 [sub_resource type="Sky" id="Sky"]
 sky_material=SubResource("SkyMaterial")
+radiance_size=1
 [sub_resource type="Environment" id="Environment"]
 background_mode=2
 sky=SubResource("Sky")
-background_color=Color(0.69,0.81,0.86,1)
+background_color=Color(0.02,0.025,0.045,1)
 ambient_light_source=2
-ambient_light_color=Color(0.85,0.89,0.78,1)
-ambient_light_energy=0.28
+ambient_light_color=Color(0.42,0.5,0.74,1)
+ambient_light_energy=0.1
 tonemap_mode=2
+glow_enabled=true
+glow_intensity=0.7
+glow_bloom=0.02
+glow_blend_mode=1
+glow_hdr_threshold=0.9
 fog_enabled=true
-fog_light_color=Color(0.75,0.83,0.81,1)
-fog_density=0.00035
+fog_light_color=Color(0.04,0.05,0.08,1)
+fog_density=0.0065
+fog_sky_affect=0.0
 [node name="SamiParkGame" type="Node3D"]
 script=ExtResource("1")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment=SubResource("Environment")
-[node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees=Vector3(-43,-32,0)
-light_color=Color(1,0.98,0.92,1)
-light_energy=0.65
-shadow_enabled=true
-directional_shadow_max_distance=90.0
+[node name="Moon" type="DirectionalLight3D" parent="."]
+rotation_degrees=Vector3(-38,148,0)
+light_color=Color(0.62,0.72,1,1)
+light_energy=0.2
 [node name="SamiPark" parent="." instance=ExtResource("2")]
 [node name="GolfCart" parent="." instance=ExtResource("3")]
 [node name="WalkPlayer" parent="." instance=ExtResource("6")]

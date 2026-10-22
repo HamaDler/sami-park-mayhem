@@ -226,8 +226,20 @@ func _furniture() -> void:
             var bulb := ParkGeometry.material(Color("efe3ba"))
             bulb.emission_enabled = true
             bulb.emission = Color("ecce7f")
+            bulb.emission_energy_multiplier = 4.0
             ParkGeometry.box(prop,Vector3(0,3.95,0),Vector3(0.27,0.2,0.27),bulb)
             ParkGeometry.collider(prop,Vector3(0,1.0,0),Vector3(0.17,2,0.17))
+            # Night lighting: no shadows, and distant lamps fade out to stay inside the light limit.
+            var lamp := OmniLight3D.new()
+            lamp.position = Vector3(0,3.7,0)
+            lamp.light_color = Color(1.0,0.78,0.48)
+            lamp.light_energy = 1.6
+            lamp.omni_range = 15.0
+            lamp.omni_attenuation = 1.3
+            lamp.distance_fade_enabled = true
+            lamp.distance_fade_begin = 60.0
+            lamp.distance_fade_length = 20.0
+            prop.add_child(lamp)
         index+=1
 
 func _entrance() -> void:
