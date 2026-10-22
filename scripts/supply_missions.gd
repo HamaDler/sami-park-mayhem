@@ -63,7 +63,7 @@ func _build_beacon() -> void:
     ring=MeshInstance3D.new();var torus:=TorusMesh.new();torus.inner_radius=float(settings.radius)-.12;torus.outer_radius=float(settings.radius)
     torus.rings=48;torus.ring_segments=4;ring.mesh=torus;ring.position.y=.13;ring.scale.y=.16;ring.material_override=light;beacon.add_child(ring)
     var pole:=ParkGeometry.box(beacon,Vector3(0,6,0),Vector3(.10,10,.1),light);pole.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-    var label:=Label3D.new();label.text="SUPPLY CACHE\nSECURE AREA ON FOOT";label.position.y=3;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.font=GameUI.bold();label.font_size=46;label.pixel_size=.012;beacon.add_child(label)
+    var label:=Label3D.new();label.text="SUPPLY CACHE\nSECURE AREA ON FOOT";label.position.y=3;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;GameUI.style_sign(label,12);label.font_size=46;label.pixel_size=.012;beacon.add_child(label)
     # Preserve the previous grid state so removing a crate cannot clear a permanent obstacle.
     var nav: Node=survival.enemies.navigation
     var cell: Vector2i=nav.id(position_2d)

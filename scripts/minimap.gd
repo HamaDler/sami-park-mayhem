@@ -30,8 +30,8 @@ func mapped(points: PackedVector2Array) -> PackedVector2Array:
 func _draw() -> void:
     draw_colored_polygon(PackedVector2Array([Vector2.ZERO,Vector2(size.x-12,0),Vector2(size.x,12),size,Vector2(12,size.y),Vector2(0,size.y-12)]),Color(.025,.04,.065,.86))
     draw_line(Vector2(0,0),Vector2(size.x-12,0),GameUI.LIME,3,true)
-    draw_string(GameUI.bold(),Vector2(14,24),"SAMI PARK",HORIZONTAL_ALIGNMENT_LEFT,-1,17,GameUI.WHITE)
-    draw_string(GameUI.bold(),Vector2(size.x-43,24),"M",HORIZONTAL_ALIGNMENT_LEFT,-1,17,GameUI.LIME)
+    draw_string(GameUI.display(),Vector2(14,25),"SAMI PARK",HORIZONTAL_ALIGNMENT_LEFT,-1,GameUI.SIZE_LABEL,GameUI.WHITE)
+    draw_string(GameUI.display(),Vector2(size.x-41,25),"M",HORIZONTAL_ALIGNMENT_LEFT,-1,GameUI.SIZE_LABEL,GameUI.LIME)
     if park==null:return
     draw_colored_polygon(mapped(boundary),Color("334f42"))
     for line in path_lines:
@@ -54,6 +54,6 @@ func _draw() -> void:
     var side:=Vector2(-forward.y,forward.x)
     draw_circle(point,9,Color(0,0,0,.7))
     draw_colored_polygon(PackedVector2Array([point+forward*8,point-forward*5+side*5,point-forward*5-side*5]),GameUI.LIME)
-    draw_string(GameUI.bold(),Vector2(size.x-27,48),"N",HORIZONTAL_ALIGNMENT_LEFT,-1,13,GameUI.WHITE)
+    draw_string(GameUI.display(),Vector2(size.x-27,48),"N",HORIZONTAL_ALIGNMENT_LEFT,-1,GameUI.SIZE_SMALL,GameUI.WHITE)
     draw_line(Vector2(14,size.y-17),Vector2(34,size.y-17),GameUI.MUTED,2)
-    draw_string(GameUI.regular(),Vector2(42,size.y-12),"200 m",HORIZONTAL_ALIGNMENT_LEFT,-1,12,GameUI.MUTED)
+    draw_string(GameUI.body_bold(),Vector2(42,size.y-12),"200 m",HORIZONTAL_ALIGNMENT_LEFT,-1,GameUI.SIZE_MICRO+1,GameUI.MUTED)

@@ -182,9 +182,17 @@ Edit `scenes/sports_area.tscn`, `scripts/sports_area.gd`, and `data/sports_layou
 
 The driving HUD uses a transparent circular tachometer with white ticks, a redline, a smoothed needle, large italic speed digits, and a gear indicator. KPH is the actual controller speed. The gear and RPM readings are visual approximations for the arcade controller; the cart does not simulate a combustion engine or physical gearbox. Reverse shows R and idle shows N. DRIFT, OFF ROAD and rollover recovery prompts appear below the dial.
 
-The north-up minimap sits at the lower left. Opening driving hints fade after 19 seconds; map/menu/reset prompts remain at the bottom. Recovery notifications use a short angular banner. Press Esc for the pause menu's DRIVE, OPTIONS and CONTROLS tabs. OPTIONS has HIGH/LOW vegetation detail. The full map uses the same condensed typography, charcoal panels and lime selection accents.
+The north-up minimap sits at the lower left. Opening driving hints fade after 19 seconds; map/menu/reset prompts remain at the bottom. Notifications appear in a short angular banner at the top centre. Press Esc for the pause menu's DRIVE, OPTIONS and CONTROLS tabs. OPTIONS has HIGH/LOW vegetation detail. The full map uses the same typography, charcoal panels and lime selection accents.
 
-UI scenes remain separate and editable. The shared style lives in `scripts/game_ui.gd`, with clipped panels in `scripts/game_plate.gd`. Rajdhani Bold/SemiBold by Indian Type Foundry is bundled under SIL Open Font License 1.1; see `assets/ui/CREDITS.md` and `assets/ui/fonts/OFL.txt`. The source font files are unmodified; digit italics use a runtime font transform.
+UI scenes remain separate and editable. The shared style lives in `scripts/game_ui.gd`, with clipped panels in `scripts/game_plate.gd`.
+
+**Typography.** Three typefaces, each with one job, all under the SIL Open Font License 1.1 (see `assets/ui/CREDITS.md`):
+
+- **Lilita One** (`GameUI.display()`, and `GameUI.caption()` for small spaced-out captions): headings, buttons, HUD labels and numbers, weapon names, prompts and world signs.
+- **Nunito Sans** (`GameUI.body()` / `GameUI.body_bold()`, weight set on its variable axis): descriptions, settings help, credits, map place names and sign details, written in sentence case.
+- **Bangers** (`GameUI.shout()`): only for dramatic moments: wave banners, HEADSHOT! / ROADKILL! callouts, the game-over line and the SAMI PARK title.
+
+Sizes come from one type scale (`GameUI.SIZE_*`). Text drawn straight over the 3D scene gets an ink outline (`GameUI.OUTLINE`) to match the comic look; text inside panels does not. Large numbers use thousands separators. Station signs are a bold title plus a smaller detail line and fade out beyond 40 m. `tests/typography_capture.gd` renders every text-heavy screen for review (run without `--headless`).
 
 
 ## Northwestern running track
