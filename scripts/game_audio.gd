@@ -76,6 +76,12 @@ func get_stream(filename: String, loop: bool=false) -> AudioStream:
         stream.loop_mode=AudioStreamWAV.LOOP_FORWARD;stream.loop_begin=0
         stream.loop_end=int(round(stream.get_length()*stream.mix_rate))
     return stream
+# Stop an event that is still playing (e.g. a reload sound when the reload is cancelled).
+func stop_sfx(event: String) -> void:
+    if not settings.events.has(event):return
+    var stream: AudioStream=get_stream(str(settings.events[event].file))
+    for voice in voices+ui_voices:
+        if voice.playing and voice.stream==stream:voice.stop()
 func play_sfx(event: String, extra_db: float=0) -> void:
     if not settings.events.has(event):return
     var definition: Dictionary=settings.events[event]

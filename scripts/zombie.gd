@@ -134,6 +134,8 @@ func die() -> void:
     if not alive:return
     alive=false;collision_layer=0;body_box.collision_layer=0;head_box.collision_layer=0
     if eyes:eyes.visible=false
+    # Type markers and labels hang off the zombie's root, not its body, so they would float over the corpse.
+    if type_visual:type_visual.visible=false
     velocity=Vector3.ZERO;attack_time=0;corpse_time=float(manager.settings.corpse_seconds)
     scream_time=0;stagger_time=0;lunge=Vector2.ZERO
     if scream_ring:scream_ring.hide()

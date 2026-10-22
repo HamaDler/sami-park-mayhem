@@ -111,6 +111,8 @@ func _physics_process(delta: float) -> void:
     var stamina_settings: Dictionary=settings.stamina
     if exhausted and stamina>=float(stamina_settings.sprint_unlock):exhausted=false
     sprinting=Input.is_action_pressed("sprint") and not movement_locked and not dead and not weapons.aiming and not is_busy() and not exhausted and sprint_block==0 and input.length()>.2 and input.y<.35
+    # Breaking into a sprint cancels a reload (rolling and melee only pause it).
+    if sprinting and weapons.reload_time>0:weapons.cancel_reload()
     if sprinting:_spend_stamina(float(stamina_settings.sprint_drain)*delta)
     else:
         stamina_delay=maxf(0,stamina_delay-delta)

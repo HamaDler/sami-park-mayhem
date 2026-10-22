@@ -1,5 +1,6 @@
 extends Node3D
 const GunModels=preload("res://scripts/weapon_models.gd")
+const ArmIK=preload("res://scripts/arm_ik.gd")
 var model: Node3D
 var skeleton: Skeleton3D
 var animations: AnimationPlayer
@@ -145,36 +146,13 @@ func _pose_driver() -> void:
     _solve_arm("L",wheel-right*.13,vehicle.visual.to_global(Vector3(-.50,1.11,.09)))
     _solve_arm("R",wheel+right*.13,vehicle.visual.to_global(Vector3(.03,1.11,.09)))
 func bone_world(bone_name: String) -> Transform3D:
-    return skeleton.global_transform*skeleton.get_bone_global_pose(skeleton.find_bone(bone_name))
+    return ArmIK.bone_world(skeleton,bone_name)
 func _orient(bone_name: String, old_direction: Vector3, new_direction: Vector3) -> void:
-    if old_direction.length_squared()<.0000001 or new_direction.length_squared()<.0000001:return
-    var index:=skeleton.find_bone(bone_name)
-    # Updating an entire global pose decomposes shear back into local scale.
-    # Repeating that through the arm chain inflates the skin over time.
-    # Grip IK changes only a normalized local rotation, preserving bone lengths.
-    var rotation_delta:=Basis(Quaternion(old_direction.normalized(),new_direction.normalized()).normalized())
-    var desired_world: Basis=rotation_delta*bone_world(bone_name).basis.orthonormalized()
-    var parent_index:=skeleton.get_bone_parent(index)
-    var parent_world: Basis=skeleton.global_basis.orthonormalized()
-    if parent_index>=0:
-        parent_world=(skeleton.global_basis*skeleton.get_bone_global_pose(parent_index).basis).orthonormalized()
-    var local_rotation: Quaternion=(parent_world.inverse()*desired_world).get_rotation_quaternion().normalized()
-    skeleton.set_bone_pose_rotation(index,local_rotation)
+    ArmIK.orient(skeleton,bone_name,old_direction,new_direction)
 func _hinge(start: Vector3, target: Vector3, pole: Vector3, first_length: float, second_length: float) -> Vector3:
-    var direction: Vector3=(target-start).normalized()
-    var distance:=clampf(start.distance_to(target),absf(first_length-second_length)+.001,first_length+second_length-.001)
-    var along: float=(first_length*first_length-second_length*second_length+distance*distance)/(2*distance)
-    var across:=sqrt(maxf(0,first_length*first_length-along*along))
-    var bend: Vector3=(pole-start)-direction*(pole-start).dot(direction)
-    if bend.length_squared()<.000001:bend=Vector3.UP.cross(direction)
-    return start+direction*along+bend.normalized()*across
+    return ArmIK.hinge(start,target,pole,first_length,second_length)
 func _solve_arm(side: String, target: Vector3, pole: Vector3) -> void:
-    var upper: String="UpperArm."+side;var lower: String="LowerArm."+side;var wrist: String="Wrist."+side
-    var a:=bone_world(upper).origin;var b:=bone_world(lower).origin;var c:=bone_world(wrist).origin
-    var elbow:=_hinge(a,target,pole,a.distance_to(b),b.distance_to(c))
-    _orient(upper,b-a,elbow-a)
-    b=bone_world(lower).origin;c=bone_world(wrist).origin
-    _orient(lower,c-b,target-b)
+    ArmIK.solve_arm(skeleton,side,target,pole)
 func _solve_leg(side: String, target: Vector3, pole: Vector3) -> void:
     var upper: String="UpperLeg."+side;var lower: String="LowerLeg."+side;var foot: String="Foot."+side
     var a:=bone_world(upper).origin;var b:=bone_world(lower).origin
