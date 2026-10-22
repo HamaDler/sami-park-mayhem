@@ -6,6 +6,8 @@ signal run_ended
 signal hit_feedback(kind: String, points: int, label: String)
 # World position the last hit came from; the HUD draws a directional indicator toward it.
 signal player_hit_from(source: Vector3)
+# Every zombie hit, with where it landed (drives the comic sound-effect lettering).
+signal zombie_struck(point: Vector3, cause: String, headshot: bool, killed: bool)
 var game: Node3D
 var config: Dictionary
 var health: float=100
@@ -113,6 +115,7 @@ func damage_zombie(zombie: CharacterBody3D, amount: float, headshot: bool, cause
     if not killed:
         zombie.apply_hit(direction,force,headshot or applied>=60 or cause=="melee",stagger)
         if cause!="ram":hit_feedback.emit("head" if headshot else "body",0,"")
+        zombie_struck.emit(point,cause,headshot,false)
         return
     # This is the only death/reward path. die() clears alive before any signals.
     zombie.die();zombie.apply_hit(direction,force*1.4,true);kills+=1;wave.register_kill();records.lifetime_kills+=1
@@ -124,6 +127,7 @@ func damage_zombie(zombie: CharacterBody3D, amount: float, headshot: bool, cause
     dinars+=int(economy[key+"_dinars"])*multiplier
     hit_feedback.emit("headkill" if headshot else "kill",int(economy[key+"_score"]),{"roadkill":"ROADKILL","headshot":"HEADSHOT"}.get(key,"MELEE" if cause=="melee" else ""))
     rewards.maybe_drop(point);zombie_killed.emit(zombie.id,cause,headshot)
+    zombie_struck.emit(zombie.global_position+Vector3.UP*1.2 if cause=="ram" else point,cause,headshot,true)
     if kills%10==0:records.save_records(score,completed_wave)
 func damage_target(amount: float, source:=Vector3.INF) -> void:
     if game.is_driving():game.active_vehicle.vehicle.receive_damage(amount)

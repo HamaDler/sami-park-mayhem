@@ -8,7 +8,7 @@ var reward: Dictionary={}
 var preview: Node3D
 var lid: Node3D
 var rolling: bool=false
-var banner: Label3D
+var banner: Node3D
 var spin_time: float=0
 func initialize(session: Node3D, location: String) -> void:
     survival=session;display_name=location
@@ -18,26 +18,37 @@ func initialize(session: Node3D, location: String) -> void:
     lid=Node3D.new();lid.position=Vector3(0,1.11,.5);add_child(lid)
     ParkGeometry.box(lid,Vector3(0,.05,-.5),Vector3(2.26,.12,1.06),wood)
     for x in [-.65,.65]:
-        var mark:=Label3D.new();mark.text="?";mark.font=GameUI.bold();mark.font_size=96;mark.pixel_size=.008;mark.position=Vector3(x,.65,-.514);add_child(mark)
-    banner=_sign(self,"MYSTERY BOX  /  %d IQD" % int(survival.config.economy.box_price),Vector3(0,2.7,0),Color("ffd268"))
+        # Painted on the crate: lit by the scene, not glowing.
+        var mark:=Label3D.new();mark.text="?";GameUI.style_sign(mark,18);mark.font_size=96;mark.pixel_size=.008;mark.position=Vector3(x,.65,-.514)
+        mark.shaded=true;mark.alpha_cut=Label3D.ALPHA_CUT_DISCARD;mark.outline_size=0;mark.modulate=Color("ffd268");add_child(mark)
+    banner=GameUI.world_sign(self,"MYSTERY BOX","%d IQD" % int(survival.config.economy.box_price),Vector3(0,2.35,.9),Color("ffd268"))
+    _work_lamp(Vector3(1.9,0,2.4),metal)
     actions.append({"kind":"box","position":Vector3.ZERO,"station":self})
     var ammo:=Node3D.new();ammo.position=Vector3(3.8,0,0);add_child(ammo)
     ParkGeometry.box(ammo,Vector3(0,.55,0),Vector3(1,1.1,.9),metal,true)
     ParkGeometry.box(ammo,Vector3(0,1.15,0),Vector3(1.1,.12,1),gold)
-    _sign(ammo,"AMMO  /  %d IQD" % int(survival.config.economy.ammo_price),Vector3(0,1.9,0),Color("85d2f4"))
+    GameUI.world_sign(ammo,"AMMO","%d IQD" % int(survival.config.economy.ammo_price),Vector3(0,1.75,.7),Color("85d2f4"))
     actions.append({"kind":"ammo","position":ammo.position,"station":self})
     var repair:=Node3D.new();repair.position=Vector3(0,0,4.8);add_child(repair)
     ParkGeometry.box(repair,Vector3(0,.6,0),Vector3(1.2,1.2,.7),metal,true)
-    _sign(repair,"CART REPAIR  /  %d IQD" % int(survival.config.economy.repair_price),Vector3(0,2.1,0),Color("9deb91"))
+    GameUI.world_sign(repair,"CART REPAIR","%d IQD" % int(survival.config.economy.repair_price),Vector3(0,1.75,.6),Color("9deb91"))
     actions.append({"kind":"repair","position":repair.position,"station":self})
     var workshop:=Node3D.new();workshop.position=Vector3(3.8,0,4.8);add_child(workshop)
     ParkGeometry.box(workshop,Vector3(0,.6,0),Vector3(1.5,1.2,.7),metal,true)
     ParkGeometry.box(workshop,Vector3(0,1.25,0),Vector3(1.6,.12,.9),gold)
-    _sign(workshop,"CART WORKSHOP\nBUMPER / ARMOR / HANDLING",Vector3(0,2.2,0),Color("c5ed55"))
+    GameUI.world_sign(workshop,"CART WORKSHOP","Bumper · Armor · Handling",Vector3(0,2.0,.6),Color("c5ed55"))
     actions.append({"kind":"upgrade","position":workshop.position,"station":self})
-func _sign(parent: Node3D, text: String, point: Vector3, color: Color) -> Label3D:
-    var label:=Label3D.new();label.text=text;label.position=point;label.font=GameUI.bold();label.font_size=32;label.pixel_size=.008
-    label.modulate=color;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;parent.add_child(label);return label
+# A work light in the middle of the station: a pool of warm light you can see from afar, so the
+# signs read when you get there (the map and HUD markers still guide you in).
+func _work_lamp(point: Vector3, metal: Material) -> void:
+    var pole:=ParkGeometry.box(self,point+Vector3(0,1.7,0),Vector3(.07,3.4,.07),metal)
+    pole.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    var bulb:=ParkGeometry.material(Color("ffe3a8"));bulb.emission_enabled=true;bulb.emission=Color("ffd27a");bulb.emission_energy_multiplier=4.0
+    ParkGeometry.box(self,point+Vector3(0,3.42,0),Vector3(.32,.12,.32),bulb)
+    var light:=OmniLight3D.new();light.position=point+Vector3(0,3.2,0)
+    light.light_color=Color(1,.8,.5);light.light_energy=1.3;light.omni_range=8.5;light.omni_attenuation=1.2
+    light.distance_fade_enabled=true;light.distance_fade_begin=70;light.distance_fade_length=20
+    add_child(light)
 func prompt(kind: String) -> String:
     if kind=="upgrade":return "F  /  CART WORKSHOP"
     if kind=="ammo":return "F  /  REFILL AMMO   %d IQD" % int(survival.config.economy.ammo_price)
@@ -59,14 +70,14 @@ func use(kind: String) -> void:
         clear_reward()
     elif not rolling and survival.spend(int(economy.box_price)):
         reward=survival.roll_weapon();rolling=true;roll_time=float(economy.box_reveal_seconds);spin_time=0
-        _preview(survival.enemies.random.randi_range(1,3));banner.text="ROLLING…"
+        _preview(survival.enemies.random.randi_range(1,3));GameUI.set_sign(banner,"ROLLING…")
 func _preview(slot: int) -> void:
     if preview:preview.queue_free()
     preview=load(["res://scenes/weapons/pistol.tscn","res://scenes/weapons/rifle.tscn","res://scenes/weapons/sniper.tscn"][slot-1]).instantiate()
     preview.position=Vector3(0,1.95,0);preview.scale=Vector3.ONE*2.1;add_child(preview)
 func clear_reward() -> void:
     if preview:preview.queue_free();preview=null
-    reward.clear();reward_time=0;banner.text="MYSTERY BOX  /  %d IQD" % int(survival.config.economy.box_price)
+    reward.clear();reward_time=0;GameUI.set_sign(banner,"MYSTERY BOX","%d IQD" % int(survival.config.economy.box_price))
 func _physics_process(delta: float) -> void:
     if not survival or survival.over:return
     lid.rotation.x=lerpf(lid.rotation.x,-1.2 if rolling or not reward.is_empty() else 0.0,1-exp(-delta*8))
@@ -77,7 +88,7 @@ func _physics_process(delta: float) -> void:
         if roll_time<=0:
             GameUI.play_ui("ui_confirm")
             rolling=false;reward_time=float(survival.config.economy.reward_seconds);_preview(int(reward.slot))
-            banner.text=survival.weapon_title(int(reward.slot),int(reward.tier));survival.announce("MYSTERY BOX READY — F TO CLAIM")
+            GameUI.set_sign(banner,survival.weapon_title(int(reward.slot),int(reward.tier)),"F to claim");survival.announce("MYSTERY BOX READY — F TO CLAIM")
     elif not reward.is_empty():
         reward_time-=delta
         if reward_time<=0:clear_reward()

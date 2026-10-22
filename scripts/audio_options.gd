@@ -2,16 +2,16 @@ extends Control
 var sliders: Dictionary={}
 var credits: AcceptDialog
 func _ready() -> void:
-    GameUI.label(self,"AUDIO",Vector2.ZERO,29,GameUI.WHITE,true)
-    GameUI.label(self,"MUSIC / COMBAT / ENGINE / INTERFACE",Vector2(0,39),15,GameUI.MUTED)
+    GameUI.label(self,"AUDIO",Vector2.ZERO,GameUI.SIZE_HEADING,GameUI.WHITE,true)
+    GameUI.label(self,"Music, combat, engine and interface volume. Changes save automatically.",Vector2(0,38),GameUI.SIZE_BODY,GameUI.MUTED)
     var audio: Node=GameUI.audio_manager()
     var buses: Array[String]=["Master","Music","SFX","UI"]
     for index in buses.size():
         var bus: String=buses[index];var y: float=65+index*66
         var panel:=Panel.new();panel.position=Vector2(0,y);panel.size=Vector2(500,54)
         panel.add_theme_stylebox_override("panel",GameUI.style(GameUI.PANEL));add_child(panel)
-        GameUI.label(panel,["MASTER","MUSIC","EFFECTS","UI"][index],Vector2(12,15),18,GameUI.WHITE,true)
-        var percentage:=GameUI.label(panel,"",Vector2(451,15),18,GameUI.LIME,true)
+        GameUI.label(panel,["MASTER","MUSIC","EFFECTS","INTERFACE"][index],Vector2(12,16),GameUI.SIZE_LABEL+1,GameUI.WHITE,true)
+        var percentage:=GameUI.label(panel,"",Vector2(446,16),GameUI.SIZE_LABEL+1,GameUI.LIME,true)
         var slider:=HSlider.new();slider.min_value=0;slider.max_value=100;slider.step=1
         slider.position=Vector2(160,14);slider.size=Vector2(278,28);slider.modulate=GameUI.LIME;panel.add_child(slider)
         slider.value=roundi(float(audio.volumes[bus])*100) if audio else 80

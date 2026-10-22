@@ -1,5 +1,6 @@
 shader_type spatial;
 render_mode cull_back;
+#include "res://assets/shaders/comic_light.gdshaderinc"
 uniform sampler2D pose_positions : filter_nearest, repeat_disable;
 uniform sampler2D pose_normals : filter_nearest, repeat_disable;
 uniform vec3 pose_min;

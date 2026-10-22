@@ -43,6 +43,10 @@ var lunge:=Vector2.ZERO
 var sink_time: float=0
 var model_base_y: float=0
 const WALK_CLIP_SPEED: float=1.6
+# Glowing eyes sit on the front of the head hitbox and follow the head bone.
+const EYE_COLOR:=Color(1.0,.84,.22)
+static var eye_material: StandardMaterial3D
+var eyes: Node3D
 const RUN_CLIP_SPEED: float=4.0
 func build(owner_manager: Node3D, packed: PackedScene, _variant: int) -> void:
     manager=owner_manager
@@ -81,7 +85,28 @@ func build(owner_manager: Node3D, packed: PackedScene, _variant: int) -> void:
         else:add_child(head_box);head_box.position=Vector3(0,target_height*.9,0)
     else:add_child(head_box);head_box.position=Vector3(0,target_height*.9,0)
     for mesh: MeshInstance3D in meshes:mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+    _build_eyes()
     deactivate()
+func _build_eyes() -> void:
+    if head_attachment==null or skeleton==null:return
+    # Directions in the head bone's own space, taken from the rest pose (head facing forward).
+    var bone: int=skeleton.find_bone(head_attachment.bone_name)
+    var head_pose: Transform3D=global_transform.affine_inverse()*skeleton.global_transform*skeleton.get_bone_global_rest(bone)
+    var to_head: Basis=head_pose.basis.inverse()
+    var forward: Vector3=(to_head*Vector3.FORWARD).normalized()
+    var up: Vector3=(to_head*Vector3.UP).normalized()
+    var side: Vector3=forward.cross(up).normalized()
+    var radius: float=head_box.get_child(0).shape.radius
+    if eye_material==null:
+        eye_material=StandardMaterial3D.new();eye_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+        eye_material.albedo_color=EYE_COLOR;eye_material.emission_enabled=true;eye_material.emission=EYE_COLOR;eye_material.emission_energy_multiplier=2.5
+    eyes=Node3D.new();eyes.name="GlowingEyes";head_box.add_child(eyes)
+    for offset in [-1.0,1.0]:
+        var eye:=MeshInstance3D.new();var ball:=SphereMesh.new()
+        ball.radius=radius*.1;ball.height=radius*.14;ball.radial_segments=8;ball.rings=4
+        eye.mesh=ball;eye.material_override=eye_material;eye.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+        eye.position=forward*radius*.86+up*radius*.1+side*radius*.33*offset
+        eyes.add_child(eye)
 func _hitbox(head: bool) -> Area3D:
     var area:=Area3D.new();area.set_script(load("res://scripts/zombie_hitbox.gd"))
     area.zombie=self;area.headshot=head;area.collision_layer=0;area.collision_mask=0;area.monitoring=false;area.monitorable=false
@@ -98,6 +123,7 @@ func activate(point: Vector2, identifier: int, stats: Dictionary) -> void:
     global_position=Vector3(point.x,.06,point.y);velocity=Vector3.ZERO;last_position=point
     collision_layer=8;body_box.collision_layer=16;head_box.collision_layer=32
     visible=true;set_physics_process(true);reset_physics_interpolation();_animate("Idle")
+    if eyes:eyes.visible=true
 func deactivate() -> void:
     alive=false;visible=false;collision_layer=0;sink_time=0
     if model:model.position.y=model_base_y
@@ -107,6 +133,9 @@ func deactivate() -> void:
 func die() -> void:
     if not alive:return
     alive=false;collision_layer=0;body_box.collision_layer=0;head_box.collision_layer=0
+    if eyes:eyes.visible=false
+    # Type markers and labels hang off the zombie's root, not its body, so they would float over the corpse.
+    if type_visual:type_visual.visible=false
     velocity=Vector3.ZERO;attack_time=0;corpse_time=float(manager.settings.corpse_seconds)
     scream_time=0;stagger_time=0;lunge=Vector2.ZERO
     if scream_ring:scream_ring.hide()
@@ -266,8 +295,8 @@ func _set_type(kind: String) -> void:
     if kind=="walker":return
     var color:=Color(manager.types[kind].color)
     var material:=ParkGeometry.material(color,.65)
-    var label:=Label3D.new();label.text=manager.types[kind].name;label.modulate=color;label.font=GameUI.bold();label.font_size=32;label.pixel_size=.005
-    label.position.y=2.05;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.visibility_range_end=45;type_visual.add_child(label)
+    var label:=Label3D.new();label.text=manager.types[kind].name;label.modulate=color;GameUI.style_sign(label,10);GameUI.close_up(label,12);label.font_size=32;label.pixel_size=.005
+    label.position.y=2.05;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;type_visual.add_child(label)
     if kind=="armored":
         ParkGeometry.box(type_visual,Vector3(0,.9,0),Vector3(.68,.5,.45),material)
         # Use the imported head's local units so the helmet follows its animation and scale.

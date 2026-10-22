@@ -11,15 +11,15 @@ func _ready() -> void:
     var italic:=FontVariation.new()
     italic.base_font=GameUI.bold()
     italic.variation_transform=Transform2D(Vector2(1,0),Vector2(-.13,1),Vector2.ZERO)
-    speed_label=GameUI.label(self,"0",Vector2(111,126),80,GameUI.WHITE,true)
+    speed_label=GameUI.label(self,"0",Vector2(111,130),74,GameUI.WHITE,true)
     speed_label.add_theme_font_override("font",italic)
     speed_label.size=Vector2(151,91)
     speed_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-    gear_label=GameUI.label(self,"N",Vector2(131,100),32,GameUI.WHITE,true)
+    gear_label=GameUI.label(self,"N",Vector2(131,102),30,GameUI.WHITE,true)
     gear_label.size=Vector2(82,42)
     gear_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-    GameUI.label(self,"KPH",Vector2(152,215),16,GameUI.MUTED,true)
-    GameUI.label(self,"RPM  x1000",Vector2(69,221),11,GameUI.MUTED)
+    GameUI.label(self,"KPH",Vector2(153,216),GameUI.SIZE_SMALL+1,GameUI.MUTED,true).add_theme_font_override("font",GameUI.caption())
+    GameUI.label(self,"RPM x1000",Vector2(66,222),GameUI.SIZE_MICRO,GameUI.MUTED)
 func initialize(cart: CharacterBody3D) -> void:vehicle=cart
 func _process(delta: float) -> void:
     if vehicle==null:return
@@ -53,7 +53,7 @@ func _draw() -> void:
     for number in 9:
         var point:=point_on_dial(number,85)
         var color:=GameUI.RED if number>=7 else GameUI.WHITE
-        draw_string(GameUI.regular(),point+Vector2(-4,5),str(number),HORIZONTAL_ALIGNMENT_LEFT,-1,15,color)
+        draw_string(GameUI.display(),point+Vector2(-4,5),str(number),HORIZONTAL_ALIGNMENT_LEFT,-1,14,color)
     var tip:=point_on_dial(rpm/1000,101)
     var direction: Vector2=(tip-center).normalized()
     var normal:=Vector2(-direction.y,direction.x)

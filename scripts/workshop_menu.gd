@@ -9,14 +9,14 @@ func _ready() -> void:
     var panel:=Panel.new();add_child(panel);panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
     panel.offset_left=-320;panel.offset_top=-237;panel.offset_right=320;panel.offset_bottom=237
     panel.add_theme_stylebox_override("panel",GameUI.style(GameUI.INK))
-    GameUI.label(panel,"CART WORKSHOP",Vector2(22,12),36,GameUI.LIME,true)
-    balance=GameUI.label(panel,"",Vector2(23,57),20,GameUI.WHITE,true)
-    GameUI.label(panel,"COMBAT CONTINUES WHILE YOU SHOP",Vector2(23,87),17,GameUI.RED,true)
+    GameUI.label(panel,"CART WORKSHOP",Vector2(22,14),GameUI.SIZE_TITLE-4,GameUI.LIME,true)
+    balance=GameUI.label(panel,"",Vector2(23,58),GameUI.SIZE_SUBHEADING-2,GameUI.WHITE,true)
+    GameUI.label(panel,"Combat continues while you shop.",Vector2(23,86),GameUI.SIZE_BODY,GameUI.RED)
     var index:=0
     for kind: String in ["bumper","armor","handling"]:
         var y:=123+index*91
-        var title:=GameUI.label(panel,"",Vector2(23,y),23,GameUI.WHITE,true)
-        var description:=GameUI.label(panel,"",Vector2(23,y+31),16,GameUI.MUTED)
+        var title:=GameUI.label(panel,"",Vector2(23,y+1),GameUI.SIZE_SUBHEADING+1,GameUI.WHITE,true)
+        var description:=GameUI.label(panel,"",Vector2(23,y+31),GameUI.SIZE_BODY,GameUI.MUTED)
         var button:=GameUI.button(panel,"",Vector2(447,y),Vector2(170,55),func():
             if survival.upgrades.purchase(kind,station):refresh())
         rows[kind]={"title":title,"description":description,"button":button};index+=1

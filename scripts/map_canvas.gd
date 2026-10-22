@@ -38,9 +38,10 @@ func _ready() -> void:
     terrain.draw.connect(_draw_terrain)
     overlay=Node2D.new();overlay.name="Overlay";add_child(overlay)
     overlay.draw.connect(_draw_overlay)
-    label_font=GameUI.regular();compass_font=GameUI.bold()
+    label_font=GameUI.body_bold();compass_font=GameUI.display()
     label_style=StyleBoxFlat.new()
     label_style.bg_color=Color(.045,.065,.10,.94)
+    label_style.set_border_width_all(2);label_style.border_color=GameUI.OUTLINE_COLOR
     resized.connect(_resize_map)
 
 func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:

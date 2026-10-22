@@ -34,6 +34,12 @@ var slip_angle: float = 0.0
 var drifting: bool = false
 var handbrake_down: bool = false
 var drift_kick_timer: float = 0.0
+# Night driving: headlight beam plus glowing lenses. Headlights come on with a driver and can be toggled.
+var headlights_on: bool = true
+var headlight_beam: SpotLight3D
+var headlight_glass: StandardMaterial3D
+var brake_glass: StandardMaterial3D
+var reverse_glass: StandardMaterial3D
 @onready var visual: Node3D = $Visual
 
 func _ready() -> void:
@@ -98,6 +104,7 @@ func _physics_process(delta: float) -> void:
     var lean := clampf(-steer*speed*0.008,-0.07,0.07)
     visual.rotation.z=lerpf(visual.rotation.z,lean,1.0-exp(-delta*5))
     effects.update_effects(delta,handbrake or (throttle<0 and speed>1))
+    _update_tail_lights(handbrake or (throttle<0 and speed>.5),speed<-.1)
     safe_timer+=delta
     var p := Vector2(global_position.x,global_position.z)
     if park.is_water(p):
@@ -235,6 +242,60 @@ func _build_cart() -> void:
     visual.add_child(steering_wheel)
     imported_steering.reparent(steering_wheel,true)
     _build_driver()
+    _build_lights()
+
+func _lens(mesh_name: String, color: Color) -> StandardMaterial3D:
+    var mesh: MeshInstance3D = $Visual/Club90.find_child(mesh_name,true,false)
+    var glass := StandardMaterial3D.new()
+    glass.albedo_color = color.darkened(0.55)
+    glass.emission_enabled = true
+    glass.emission = color
+    glass.emission_energy_multiplier = 0.0
+    if mesh: mesh.material_override = glass
+    return glass
+
+func _build_lights() -> void:
+    headlight_glass = _lens("EVMCClub90_Headlights_UCB_Lights_and_Glass_0",Color(1.0,0.95,0.82))
+    brake_glass = _lens("EVMCClub90_Brakelights_UCB_Lights_and_Glass_0",Color(1.0,0.07,0.04))
+    reverse_glass = _lens("EVMCClub90_Reverse_UCB_Lights_and_Glass_0",Color(0.95,0.95,1.0))
+    headlight_beam = SpotLight3D.new()
+    headlight_beam.name = "HeadlightBeam"
+    # Just ahead of the bumper upgrade so cart parts never shadow the beam.
+    headlight_beam.position = Vector3(0,0.68,-1.58)
+    headlight_beam.rotation.x = deg_to_rad(-6.0)
+    headlight_beam.light_color = Color(1.0,0.88,0.6)
+    headlight_beam.light_energy = 1.5
+    headlight_beam.light_indirect_energy = 0.0
+    headlight_beam.spot_range = 60.0
+    headlight_beam.spot_angle = 30.0
+    headlight_beam.spot_angle_attenuation = 0.9
+    headlight_beam.spot_attenuation = 0.8
+    headlight_beam.shadow_enabled = true
+    headlight_beam.shadow_bias = 0.05
+    visual.add_child(headlight_beam)
+    _update_lights()
+
+func toggle_headlights() -> bool:
+    headlights_on = not headlights_on
+    _update_lights()
+    GameUI.play_ui("ui_click")
+    return headlights_on
+
+func headlights_lit() -> bool:
+    return headlights_on and control_enabled and health > 0
+
+func _update_lights() -> void:
+    if headlight_beam == null: return
+    var lit := headlights_lit()
+    headlight_beam.visible = lit
+    headlight_glass.emission_energy_multiplier = 4.0 if lit else 0.0
+    _update_tail_lights(false,false)
+
+func _update_tail_lights(braking: bool, reversing: bool) -> void:
+    if brake_glass == null: return
+    var running := control_enabled and health > 0
+    brake_glass.emission_energy_multiplier = (4.0 if braking else (1.2 if headlights_lit() else 0.0)) if running else 0.0
+    reverse_glass.emission_energy_multiplier = 3.0 if running and reversing else 0.0
 
 func _build_driver() -> void:
     var driver: Node3D=load("res://scenes/character_avatar.tscn").instantiate()
@@ -306,6 +367,7 @@ func set_control_enabled(value: bool) -> void:
         speed=0;velocity=Vector3.ZERO;steer=0;visual.rotation.z=0;_reset_handling()
     var driver: Node3D=visual.get_node("SeatedDriver")
     driver.visible=value;driver.set_process(value)
+    _update_lights()
 func receive_damage(amount: float) -> void:
     if health<=0 or amount<=0:return
     if survival and is_instance_valid(survival.upgrades):amount*=survival.upgrades.damage_received
@@ -313,6 +375,7 @@ func receive_damage(amount: float) -> void:
     if survival:survival.recovery_time=0
     if health==0:
         set_control_enabled(false);destroyed.emit()
+    _update_lights()
 func right_in_place() -> void:
     var p:=global_position
     var forward: Vector3=-global_basis.z

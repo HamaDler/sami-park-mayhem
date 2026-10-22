@@ -8,3 +8,6 @@ default_distance=7.0
 scroll_step=0.8
 field_of_view=62.0
 follow_height=1.25
+first_person=true
+eye_height=1.6
+driver_look_yaw_limit=2.2

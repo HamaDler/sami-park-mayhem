@@ -17,6 +17,12 @@ var shot_count: int=0
 var tracer_pool: Array[MeshInstance3D]=[]
 var impact_pool: Array[MeshInstance3D]=[]
 var tracers: Array[float]=[]
+# Tracer starts. In first person they follow the visible gun's muzzle while they fade, so they
+# stay attached to the gun when you move; the far end stays where the bullet landed.
+var tracer_begins: Array[Vector3]=[]
+var tracer_ends: Array[Vector3]=[]
+var tracer_follow: Array[bool]=[]
+var flash_follow: bool=false
 var impacts: Array[float]=[]
 var pool_index: int=0
 var survival_enabled: bool=false
@@ -40,6 +46,8 @@ func _ready() -> void:
     random.randomize()
     effects=CombatEffects.new();effects.name="CombatEffects";add_child(effects)
     _make_effects()
+    # Visual effects are placed after the camera and first-person gun have moved this frame.
+    process_priority=100
 func initialize(person: CharacterBody3D, camera: Node3D) -> void:
     player=person;camera_rig=camera;player.avatar.set_weapon(selected_slot)
 func current() -> Dictionary:
@@ -67,7 +75,7 @@ func ammo_full() -> bool:
 func set_enabled(value: bool) -> void:
     enabled=value;aiming=false;reload_time=0;cooldown=.2;suppress_until_release=true;bloom=0
     if camera_rig:camera_rig.aiming=false;camera_rig.sniper_scope=false
-    if player:player.avatar.set_weapon(selected_slot);player.avatar.set_first_person_view(false)
+    if player:player.avatar.set_weapon(selected_slot);player.avatar.set_first_person_view(camera_rig!=null and camera_rig.first_person)
 func select_weapon(slot: int) -> void:
     if not enabled or slot<1 or slot>3 or not unlocked[slot]:return
     if slot!=selected_slot:GameUI.play_ui("weapon_equip");raise_time=RAISE_SECONDS
@@ -79,6 +87,11 @@ func reload() -> void:
     if enabled and reload_time==0 and int(rounds[selected_slot])<int(current().magazine):
         reload_time=current().reload_seconds
         GameUI.play_ui(["reload_pistol","reload_rifle","reload_sniper"][selected_slot-1])
+func cancel_reload() -> void:
+    if reload_time<=0:return
+    reload_time=0
+    var audio: Node=GameUI.audio_manager()
+    if audio and audio.has_method("stop_sfx"):audio.stop_sfx(["reload_pistol","reload_rifle","reload_sniper"][selected_slot-1])
 func reload_ratio() -> float:
     return 0.0 if reload_time<=0 else 1-reload_time/float(current().reload_seconds)
 # Current cone half-angle in degrees: hip/aim base + movement + air + bloom.
@@ -105,7 +118,7 @@ func _physics_process(delta: float) -> void:
     bloom=move_toward(bloom,0,BLOOM_RECOVERY*delta)
     aiming=Input.is_action_pressed("aim") and not busy
     camera_rig.aiming=aiming;camera_rig.sniper_scope=aiming and selected_slot==3
-    player.avatar.set_first_person_view(camera_rig.sniper_scope or camera_rig.arm.spring_length<1.1)
+    player.avatar.set_first_person_view(camera_rig.first_person or camera_rig.sniper_scope or camera_rig.arm.spring_length<1.1)
     player.avatar.weapon_raise=raise_time/RAISE_SECONDS
     player.avatar.reload_progress=reload_ratio()
     if reload_time>0:
@@ -147,12 +160,18 @@ func shoot() -> Dictionary:
     var aim_hit:=get_world_3d().direct_space_state.intersect_ray(query)
     if not aim_hit.is_empty():target=aim_hit.position
     var muzzle: Vector3=player.avatar.get_weapon().get_node("Muzzle").global_position
-    query.from=muzzle;query.to=target+(target-muzzle).normalized()*.04
-    var hit:=get_world_3d().direct_space_state.intersect_ray(query)
+    var hit: Dictionary
+    if camera_rig.first_person:
+        # First person: the shot is the eye ray; the tracer starts at the visible gun.
+        hit=aim_hit
+        if camera_rig.viewmodel.visible:muzzle=camera_rig.viewmodel.muzzle_position()
+    else:
+        query.from=muzzle;query.to=target+(target-muzzle).normalized()*.04
+        hit=get_world_3d().direct_space_state.intersect_ray(query)
     if not hit.is_empty():
         target=hit.position
         var collider: Object=hit.collider
-        hit.direction=(target-muzzle).normalized()
+        hit.direction=(target-(origin if camera_rig.first_person else muzzle)).normalized()
         if collider.has_method("receive_hit"):collider.call("receive_hit",float(definition.damage),target,hit.normal)
     if not infinite_ammo:rounds[selected_slot]=int(rounds[selected_slot])-1
     cooldown=definition.interval;shot_count+=1
@@ -182,31 +201,44 @@ func _make_effects() -> void:
     for i in 24:
         var tracer:=MeshInstance3D.new();var beam:=BoxMesh.new();beam.size=Vector3(.016,.016,1)
         tracer.mesh=beam;tracer.material_override=bright;tracer.top_level=true;tracer.visible=false;tracer.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;add_child(tracer);tracer_pool.append(tracer);tracers.append(0)
+        tracer_begins.append(Vector3.ZERO);tracer_ends.append(Vector3.ZERO);tracer_follow.append(false)
         var impact:=MeshInstance3D.new();var dot:=SphereMesh.new();dot.radius=.032;dot.height=.064;dot.radial_segments=8;dot.rings=4
         impact.mesh=dot;impact.material_override=dark;impact.top_level=true;impact.visible=false;impact.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;add_child(impact);impact_pool.append(impact);impacts.append(0)
 const TRACER_SECONDS: float=.07
 func _show_shot(begin: Vector3, end: Vector3, hit: Dictionary) -> void:
     var i:=pool_index;pool_index=(pool_index+1)%tracer_pool.size()
-    var tracer:=tracer_pool[i]
-    var delta: Vector3=end-begin
-    if delta.length()>.01:
-        var z: Vector3=delta.normalized();var x:=Vector3.UP.cross(z).normalized()
-        if x.length_squared()<.01:x=Vector3.RIGHT
-        tracer.global_transform=Transform3D(Basis(x,z.cross(x).normalized(),z),(begin+end)*.5)
-        tracer.scale=Vector3(1,1,delta.length())
-        tracer.visible=true;tracers[i]=TRACER_SECONDS
+    var following: bool=_first_person_gun()
+    tracer_begins[i]=begin;tracer_ends[i]=end;tracer_follow[i]=following
+    if (end-begin).length()>.01:
+        tracers[i]=TRACER_SECONDS;_place_tracer(i,begin)
     var hit_zombie: bool=not hit.is_empty() and hit.collider is Area3D and hit.collider.get("zombie")!=null
     if not hit.is_empty() and not hit_zombie:
         impact_pool[i].global_position=end+hit.normal*.012;impact_pool[i].visible=true;impacts[i]=7
         effects.dust_puff(end+hit.normal*.03,hit.normal)
     effects.muzzle_flash(begin,1.4 if selected_slot==3 else 1.0)
+    flash_follow=following
     var audio: Node=GameUI.audio_manager()
     if audio:audio.play_weapon(selected_slot)
+func _first_person_gun() -> bool:
+    return camera_rig!=null and camera_rig.get("first_person") and camera_rig.viewmodel.visible
+func _place_tracer(i: int, begin: Vector3) -> void:
+    var tracer:=tracer_pool[i]
+    var span: Vector3=tracer_ends[i]-begin
+    if span.length()<=.01 or tracers[i]<=0:tracer.visible=false;return
+    var z: Vector3=span.normalized();var x:=Vector3.UP.cross(z).normalized()
+    if x.length_squared()<.01:x=Vector3.RIGHT
+    var width: float=tracers[i]/TRACER_SECONDS
+    tracer.global_transform=Transform3D(Basis(x*width,z.cross(x).normalized()*width,z*span.length()),begin+span*.5)
+    tracer.visible=true
+func _process(_delta: float) -> void:
+    var following: bool=_first_person_gun()
+    var muzzle: Vector3=camera_rig.viewmodel.muzzle_position() if following else Vector3.ZERO
+    for i in tracers.size():
+        if tracers[i]<=0:continue
+        _place_tracer(i,muzzle if tracer_follow[i] and following else tracer_begins[i])
+    if flash_follow and following and effects.flash_time>0:effects.move_flash(muzzle)
 func _update_effects(delta: float) -> void:
     for i in tracers.size():
-        if tracers[i]>0:
-            tracers[i]=maxf(0,tracers[i]-delta)
-            var width: float=tracers[i]/TRACER_SECONDS
-            tracer_pool[i].scale=Vector3(width,width,tracer_pool[i].scale.z)
-        tracer_pool[i].visible=tracers[i]>0
+        if tracers[i]>0:tracers[i]=maxf(0,tracers[i]-delta)
+        if tracers[i]<=0:tracer_pool[i].visible=false
         impacts[i]=maxf(0,impacts[i]-delta);impact_pool[i].visible=impacts[i]>0

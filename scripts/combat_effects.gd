@@ -152,6 +152,8 @@ func muzzle_flash(point: Vector3, scale_factor: float=1.0) -> void:
     flash_quad.global_position=point;flash_quad.scale=Vector3.ONE*scale_factor*random.randf_range(.8,1.25)
     flash_quad.rotation.z=random.randf()*TAU;flash_quad.visible=true
     flash_light.global_position=point;flash_peak=2.4*scale_factor;flash_light.light_energy=flash_peak;flash_time=.05
+func move_flash(point: Vector3) -> void:
+    flash_quad.global_position=point;flash_light.global_position=point
 func _process(delta: float) -> void:
     if flash_time>0:
         flash_time=maxf(0,flash_time-delta)

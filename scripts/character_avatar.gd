@@ -1,5 +1,6 @@
 extends Node3D
 const GunModels=preload("res://scripts/weapon_models.gd")
+const ArmIK=preload("res://scripts/arm_ik.gd")
 var model: Node3D
 var skeleton: Skeleton3D
 var animations: AnimationPlayer
@@ -27,6 +28,10 @@ var fire_push: float=0
 var action_time: float=0
 var action_ik: bool=true
 const MOUNT_BASE:=Vector3(.17,1.22,-.23)
+# First-person body: drawn as a shadow only, on its own layer so the flashlight ignores it.
+const LOCAL_BODY_LAYER: int=1<<10
+var geometry: Array[GeometryInstance3D]=[]
+var head_hidden: bool=false
 func _ready() -> void:
     settings=JSON.parse_string(FileAccess.get_file_as_string("res://data/player_settings.json"))
     model=$Model
@@ -43,6 +48,7 @@ func _ready() -> void:
     weapon_mount=Node3D.new();weapon_mount.name="WeaponMount";weapon_mount.position=MOUNT_BASE;add_child(weapon_mount)
     for slot in range(1,4):
         var weapon:=GunModels.build(slot);weapon_mount.add_child(weapon);weapon.visible=false;weapon_models.append(weapon)
+    for mesh: GeometryInstance3D in find_children("*","GeometryInstance3D",true,false):geometry.append(mesh)
     _play("Idle_Neutral");animations.advance(0)
 func _play(clip_name: String) -> void:
     var full: String="CharacterArmature|"+clip_name
@@ -55,12 +61,22 @@ func set_seated(cart: CharacterBody3D) -> void:
     _pose_driver()
 func set_weapon(slot: int) -> void:
     if slot!=equipped_slot and slot>0 and not seated:weapon_lower=1
-    equipped_slot=slot;weapon_mount.visible=slot>0 and not seated and not first_person_view
+    equipped_slot=slot;weapon_mount.visible=slot>0 and not seated
     for i in weapon_models.size():weapon_models[i].visible=i+1==slot
 func set_first_person_view(value: bool) -> void:
+    if value==first_person_view:return
     first_person_view=value
-    model.visible=not value
-    weapon_mount.visible=equipped_slot>0 and not seated and not value
+    for mesh in geometry:_set_shadow_only(mesh,value)
+func set_head_hidden(value: bool) -> void:
+    if value==head_hidden:return
+    head_hidden=value
+    for mesh in geometry:
+        if str(mesh.name).contains("Head"):_set_shadow_only(mesh,value)
+func is_drawn() -> bool:
+    return model.visible and not first_person_view
+func _set_shadow_only(mesh: GeometryInstance3D, value: bool) -> void:
+    mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if value else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+    mesh.layers=LOCAL_BODY_LAYER if value else 1
 func set_motion(value: float, on_ground: bool, aim: bool, pitch: float) -> void:
     speed=value;grounded=on_ground;aiming=aim;aim_pitch=pitch
 func play_action(clip_name: String, duration: float, keep_ik: bool=false) -> void:
@@ -91,10 +107,10 @@ func _process(delta: float) -> void:
     if action_time>0:
         action_time=maxf(0,action_time-delta)
         animations.advance(delta)
-        weapon_mount.visible=equipped_slot>0 and action_ik and not first_person_view
+        weapon_mount.visible=equipped_slot>0 and action_ik
         if not action_ik:return
     else:
-        weapon_mount.visible=equipped_slot>0 and not first_person_view
+        weapon_mount.visible=equipped_slot>0
         _play(_locomotion_clip())
         animations.speed_scale=clampf(speed/5.5,.55,1.35) if speed>.2 else 1.0
         animations.advance(delta)
@@ -130,36 +146,13 @@ func _pose_driver() -> void:
     _solve_arm("L",wheel-right*.13,vehicle.visual.to_global(Vector3(-.50,1.11,.09)))
     _solve_arm("R",wheel+right*.13,vehicle.visual.to_global(Vector3(.03,1.11,.09)))
 func bone_world(bone_name: String) -> Transform3D:
-    return skeleton.global_transform*skeleton.get_bone_global_pose(skeleton.find_bone(bone_name))
+    return ArmIK.bone_world(skeleton,bone_name)
 func _orient(bone_name: String, old_direction: Vector3, new_direction: Vector3) -> void:
-    if old_direction.length_squared()<.0000001 or new_direction.length_squared()<.0000001:return
-    var index:=skeleton.find_bone(bone_name)
-    # Updating an entire global pose decomposes shear back into local scale.
-    # Repeating that through the arm chain inflates the skin over time.
-    # Grip IK changes only a normalized local rotation, preserving bone lengths.
-    var rotation_delta:=Basis(Quaternion(old_direction.normalized(),new_direction.normalized()).normalized())
-    var desired_world: Basis=rotation_delta*bone_world(bone_name).basis.orthonormalized()
-    var parent_index:=skeleton.get_bone_parent(index)
-    var parent_world: Basis=skeleton.global_basis.orthonormalized()
-    if parent_index>=0:
-        parent_world=(skeleton.global_basis*skeleton.get_bone_global_pose(parent_index).basis).orthonormalized()
-    var local_rotation: Quaternion=(parent_world.inverse()*desired_world).get_rotation_quaternion().normalized()
-    skeleton.set_bone_pose_rotation(index,local_rotation)
+    ArmIK.orient(skeleton,bone_name,old_direction,new_direction)
 func _hinge(start: Vector3, target: Vector3, pole: Vector3, first_length: float, second_length: float) -> Vector3:
-    var direction: Vector3=(target-start).normalized()
-    var distance:=clampf(start.distance_to(target),absf(first_length-second_length)+.001,first_length+second_length-.001)
-    var along: float=(first_length*first_length-second_length*second_length+distance*distance)/(2*distance)
-    var across:=sqrt(maxf(0,first_length*first_length-along*along))
-    var bend: Vector3=(pole-start)-direction*(pole-start).dot(direction)
-    if bend.length_squared()<.000001:bend=Vector3.UP.cross(direction)
-    return start+direction*along+bend.normalized()*across
+    return ArmIK.hinge(start,target,pole,first_length,second_length)
 func _solve_arm(side: String, target: Vector3, pole: Vector3) -> void:
-    var upper: String="UpperArm."+side;var lower: String="LowerArm."+side;var wrist: String="Wrist."+side
-    var a:=bone_world(upper).origin;var b:=bone_world(lower).origin;var c:=bone_world(wrist).origin
-    var elbow:=_hinge(a,target,pole,a.distance_to(b),b.distance_to(c))
-    _orient(upper,b-a,elbow-a)
-    b=bone_world(lower).origin;c=bone_world(wrist).origin
-    _orient(lower,c-b,target-b)
+    ArmIK.solve_arm(skeleton,side,target,pole)
 func _solve_leg(side: String, target: Vector3, pole: Vector3) -> void:
     var upper: String="UpperLeg."+side;var lower: String="LowerLeg."+side;var foot: String="Foot."+side
     var a:=bone_world(upper).origin;var b:=bone_world(lower).origin

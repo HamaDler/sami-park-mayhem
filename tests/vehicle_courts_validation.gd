@@ -1,4 +1,5 @@
 extends SceneTree
+var chase_settings: Resource
 class Arena:
     extends Node3D
     var grass:=false
@@ -32,6 +33,8 @@ func run() -> void:
     ParkGeometry.collider(world,Vector3(0,-.45,0),Vector3(3400,.9,3400))
     arena=Arena.new();world.add_child(arena)
     cart=load("res://scenes/cart.tscn").instantiate();world.add_child(cart);cart.initialize(arena)
+    # Zoom checks below cover the chase camera.
+    chase_settings=load("res://data/camera_settings.tres");chase_settings.first_person=false
     rig=load("res://scenes/chase_camera.tscn").instantiate();world.add_child(rig);rig.initialize(cart)
     await frames(8)
     rig.zoom_by(100)

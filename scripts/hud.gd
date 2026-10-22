@@ -32,31 +32,35 @@ func _ready() -> void:
     root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     root.mouse_filter=Control.MOUSE_FILTER_IGNORE
     root.theme=GameUI.theme();add_child(root)
-    GameUI.label(root,"SAMI PARK",Vector2(32,22),33,GameUI.WHITE,true)
+    # Title graphic: the comic face, ink-outlined.
+    GameUI.shout_label(root,"SAMI PARK",Vector2(30,14),40,GameUI.WHITE)
     var tag:=_plate(root,Vector2(32,66),Vector2(110,23),GameUI.LIME)
-    mode_label=GameUI.label(tag,"FREE DRIVE",Vector2(11,0),16,GameUI.INK,true)
-    area_label=GameUI.label(root,"ENGLISH DOOR",Vector2(155,65),17,GameUI.WHITE,true)
+    mode_label=GameUI.label(tag,"FREE DRIVE",Vector2(11,1),GameUI.SIZE_LABEL,GameUI.INK,true)
+    area_label=GameUI.label(root,"ENGLISH DOOR",Vector2(155,66),GameUI.SIZE_LABEL,GameUI.WHITE,true,GameUI.OUTLINE)
     driving_hints=Control.new();driving_hints.position=Vector2(32,105);root.add_child(driving_hints)
     GameUI.keycap(driving_hints,"WASD",Vector2.ZERO,62)
-    GameUI.label(driving_hints,"DRIVE",Vector2(74,3),16)
+    _hint(driving_hints,"DRIVE",Vector2(74,4))
     GameUI.keycap(driving_hints,"SPACE",Vector2(147,0),67)
-    GameUI.label(driving_hints,"BRAKE / DRIFT",Vector2(226,3),16)
+    _hint(driving_hints,"BRAKE / DRIFT",Vector2(226,4))
+    GameUI.keycap(driving_hints,"T",Vector2(372,0),32);_hint(driving_hints,"HEADLIGHTS",Vector2(416,4))
     foot_hints=Control.new();foot_hints.position=Vector2(32,105);root.add_child(foot_hints);foot_hints.hide()
-    GameUI.keycap(foot_hints,"WASD",Vector2.ZERO,62);GameUI.label(foot_hints,"MOVE",Vector2(74,3),16)
-    GameUI.keycap(foot_hints,"SPACE",Vector2(147,0),67);GameUI.label(foot_hints,"JUMP",Vector2(226,3),16)
-    GameUI.keycap(foot_hints,"SHIFT",Vector2(300,0),67);GameUI.label(foot_hints,"SPRINT",Vector2(379,3),16)
-    GameUI.keycap(foot_hints,"C",Vector2(450,0),32);GameUI.label(foot_hints,"ROLL",Vector2(494,3),16)
-    GameUI.keycap(foot_hints,"V",Vector2(548,0),32);GameUI.label(foot_hints,"MELEE",Vector2(592,3),16)
+    GameUI.keycap(foot_hints,"WASD",Vector2.ZERO,62);_hint(foot_hints,"MOVE",Vector2(72,4))
+    GameUI.keycap(foot_hints,"SPACE",Vector2(140,0),67);_hint(foot_hints,"JUMP",Vector2(217,4))
+    GameUI.keycap(foot_hints,"SHIFT",Vector2(284,0),67);_hint(foot_hints,"SPRINT",Vector2(361,4))
+    GameUI.keycap(foot_hints,"C",Vector2(440,0),32);_hint(foot_hints,"ROLL",Vector2(482,4))
+    GameUI.keycap(foot_hints,"V",Vector2(540,0),32);_hint(foot_hints,"MELEE",Vector2(582,4))
+    GameUI.keycap(foot_hints,"T",Vector2(652,0),32);_hint(foot_hints,"FLASHLIGHT",Vector2(694,4))
     gauge=load("res://scenes/speedometer.tscn").instantiate();root.add_child(gauge)
     gauge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
     gauge.offset_left=-308;gauge.offset_top=-290;gauge.offset_right=-18;gauge.offset_bottom=-30
     speed_label=gauge.speed_label
-    status_label=GameUI.label(gauge,"",Vector2(89,247),18,GameUI.WHITE,true)
+    status_label=GameUI.label(gauge,"",Vector2(89,248),GameUI.SIZE_LABEL+1,GameUI.WHITE,true)
     status_label.size=Vector2(183,26);status_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
     map=Control.new();map.name="Minimap";map.set_script(load("res://scripts/minimap.gd"));root.add_child(map)
     map.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
     map.offset_left=28;map.offset_top=-302;map.offset_right=282;map.offset_bottom=-42
-    trip_label=GameUI.label(root,"0.00 KM",Vector2.ZERO,15,GameUI.MUTED,true)
+    trip_label=GameUI.label(root,"0.00 KM",Vector2.ZERO,GameUI.SIZE_SMALL,GameUI.MUTED,true,4)
+    trip_label.add_theme_font_override("font",GameUI.caption())
     trip_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
     trip_label.offset_left=32;trip_label.offset_top=-34;trip_label.offset_right=210;trip_label.offset_bottom=-12
     var footer:=Control.new();root.add_child(footer)
@@ -64,23 +68,25 @@ func _ready() -> void:
     footer.offset_left=-201;footer.offset_top=-52;footer.offset_right=230;footer.offset_bottom=-24
     for entry in [["M","MAP",0,32],["ESC","MENU",122,42],["R","RESET",266,32]]:
         GameUI.keycap(footer,entry[0],Vector2(entry[2],0),entry[3])
-        var caption:=GameUI.label(footer,entry[1],Vector2(entry[2]+entry[3]+11,3),16,GameUI.WHITE,true)
+        var caption:=GameUI.label(footer,entry[1],Vector2(entry[2]+entry[3]+10,4),GameUI.SIZE_LABEL,GameUI.WHITE,true,4)
         if entry[0]=="R":footer_reset_label=caption
-    interaction_label=GameUI.label(root,"",Vector2.ZERO,20,GameUI.WHITE,true)
+    interaction_label=GameUI.label(root,"",Vector2.ZERO,GameUI.SIZE_SUBHEADING,GameUI.WHITE,true,GameUI.OUTLINE)
     interaction_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
     interaction_label.offset_left=-280;interaction_label.offset_top=-93;interaction_label.offset_right=280;interaction_label.offset_bottom=-63
     interaction_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
     combat_hud=Control.new();combat_hud.set_script(load("res://scripts/combat_hud.gd"));root.add_child(combat_hud)
     combat_hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);combat_hud.hide()
-    var credit:=GameUI.label(root,"\u00a9 OpenStreetMap contributors",Vector2.ZERO,11,GameUI.MUTED)
+    var credit:=GameUI.label(root,"\u00a9 OpenStreetMap contributors",Vector2.ZERO,GameUI.SIZE_MICRO,GameUI.MUTED,false,3)
     credit.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
     credit.offset_left=-110;credit.offset_top=-21;credit.offset_right=180;credit.offset_bottom=-3
-    toast_plate=_plate(root,Vector2.ZERO,Vector2(500,51),Color(.04,.06,.09,.90))
+    # Messages are speech bubbles: the character talking (scripts/comic_bubble.gd).
+    toast_plate=Control.new();toast_plate.set_script(load("res://scripts/comic_bubble.gd"));root.add_child(toast_plate)
     toast_plate.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-    toast_plate.offset_left=-250;toast_plate.offset_top=70;toast_plate.offset_right=250;toast_plate.offset_bottom=121
-    toast_plate.accent=GameUI.LIME
-    toast_label=GameUI.label(toast_plate,"",Vector2(15,7),24,GameUI.WHITE,true)
-    toast_label.size=Vector2(470,36);toast_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    toast_plate.offset_top=18;toast_plate.offset_bottom=18+46+toast_plate.tail_height
+    toast_label=GameUI.label(toast_plate,"",Vector2(15,4),GameUI.SIZE_SUBHEADING-1,GameUI.INK,true)
+    toast_label.add_theme_color_override("font_shadow_color",Color(0,0,0,0))
+    toast_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;toast_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+    _fit_toast("")
     pause_overlay=load("res://scenes/game_menu.tscn").instantiate();root.add_child(pause_overlay)
     pause_overlay.resume_requested.connect(func():set_paused(false))
     pause_overlay.recover_requested.connect(func():get_parent().recover_active();set_paused(false))
@@ -99,8 +105,14 @@ func initialize(vehicle: CharacterBody3D, world: Node3D) -> void:
     show_toast("ENGLISH DOOR   /   FREE DRIVE")
 func show_toast(message: String) -> void:
     toast_label.text=message.to_upper()
+    _fit_toast(toast_label.text)
     toast_time=3.5
     toast_plate.show()
+# The bubble hugs its text instead of a fixed-width bar.
+func _fit_toast(text: String) -> void:
+    var width: float=clampf(GameUI.text_width(GameUI.display(),text,GameUI.SIZE_SUBHEADING-1)+64,240,820)
+    toast_plate.offset_left=-width*.5;toast_plate.offset_right=width*.5
+    toast_label.size=Vector2(width-30,38)
 func set_paused(value: bool) -> void:
     if get_parent().get("survival") and get_parent().survival.over:return
     if value!=get_tree().paused:GameUI.play_ui("ui_open" if value else "ui_close")
@@ -140,6 +152,9 @@ func _unhandled_input(event: InputEvent) -> void:
         if full_map.visible:close_map()
         else:set_paused(not get_tree().paused)
         get_viewport().set_input_as_handled()
+# Control hint caption next to a keycap: small display caps with an ink outline (they sit on the scene).
+func _hint(parent: Node, text: String, point: Vector2) -> Label:
+    return GameUI.label(parent,text,point,GameUI.SIZE_LABEL-1,GameUI.WHITE,true,4)
 func _process(delta: float) -> void:
     if cart==null:return
     status_label.text="DRIFT" if cart.drifting else ("REVERSE" if cart.speed<-.1 else ("" if cart.on_path else "OFF ROAD"))
@@ -185,7 +200,10 @@ func set_context(person: CharacterBody3D, in_vehicle: bool) -> void:
     tutorial_time=0
     _restore_mouse();_suppress_fire()
 func _restore_mouse() -> void:
-    Input.mouse_mode=Input.MOUSE_MODE_CAPTURED if not driving and not get_tree().paused else Input.MOUSE_MODE_VISIBLE
+    # First person looks around with the mouse in the cart too.
+    var rig: Node=get_parent().get_node_or_null("ChaseCamera")
+    var mouse_look: bool=not driving or (rig!=null and rig.first_person)
+    Input.mouse_mode=Input.MOUSE_MODE_CAPTURED if mouse_look and not get_tree().paused else Input.MOUSE_MODE_VISIBLE
 func _suppress_fire() -> void:
     var player: Node=get_parent().get_node_or_null("WalkPlayer")
     if player and is_instance_valid(player.weapons):player.weapons.suppress_until_release=true
