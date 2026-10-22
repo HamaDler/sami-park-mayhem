@@ -185,7 +185,7 @@ Edit `scenes/sports_area.tscn`, `scripts/sports_area.gd`, and `data/sports_layou
 
 The driving HUD uses a transparent circular tachometer with white ticks, a redline, a smoothed needle, large italic speed digits, and a gear indicator. KPH is the actual controller speed. The gear and RPM readings are visual approximations for the arcade controller; the cart does not simulate a combustion engine or physical gearbox. Reverse shows R and idle shows N. DRIFT, OFF ROAD and rollover recovery prompts appear below the dial.
 
-The north-up minimap sits at the lower left. Opening driving hints fade after 19 seconds; map/menu/reset prompts remain at the bottom. Notifications appear in a short angular banner at the top centre. Press Esc for the pause menu's DRIVE, OPTIONS and CONTROLS tabs. OPTIONS has HIGH/LOW vegetation detail. The full map uses the same typography, charcoal panels and lime selection accents.
+The north-up minimap sits at the lower left. Its park layer (paths, lakes, courts, track) is rendered once into an offscreen texture at the on-screen resolution and re-rendered only when the window or minimap size changes; only the markers redraw live. Drawing that layer live cost about 1.5–2 ms a frame. Opening driving hints fade after 19 seconds; map/menu/reset prompts remain at the bottom. Notifications appear in a short angular banner at the top centre. Press Esc for the pause menu's DRIVE, OPTIONS and CONTROLS tabs. OPTIONS has HIGH/LOW vegetation detail. The full map uses the same typography, charcoal panels and lime selection accents.
 
 UI scenes remain separate and editable. The shared style lives in `scripts/game_ui.gd`, with clipped panels in `scripts/game_plate.gd`.
 
